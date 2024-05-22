@@ -1,26 +1,24 @@
 # smallEHR
-Limited purpose Electronic Health Record system. Used to explore ideas in healthcare technology, and as a teaching tool for those who would like to enter the healthcare tech space.
 
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
 
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/github_username/repo_name">
+  <a href="https://github.com/CoderHausTS/smallEHR">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-<h3 align="center">project_title</h3>
+<h3 align="center">smallEHR</h3>
 
   <p align="center">
-    project_description
+    Limited purpose Electronic Health Record system. Used to explore ideas in healthcare technology, and as a teaching tool for those who would like to enter the healthcare tech space.
+
     <br />
     <a href="https://github.com/CoderHausTS/smallEHR"><strong>Explore the docs »</strong></a>
     <br />
@@ -68,7 +66,6 @@ Limited purpose Electronic Health Record system. Used to explore ideas in health
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -178,8 +175,6 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email@email_client.com
-
 Project Link: [https://github.com/CoderHausTS/smallEHR](https://github.com/CoderHausTS/smallEHR)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -209,8 +204,6 @@ Project Link: [https://github.com/CoderHausTS/smallEHR](https://github.com/Coder
 [issues-url]: https://github.com/CoderHausTS/smallEHR/issues
 [license-shield]: https://img.shields.io/github/license/CoderHausTS/smallEHR.svg?style=for-the-badge
 [license-url]: https://github.com/CoderHausTS/smallEHR/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/linkedin_username
 [product-screenshot]: images/screenshot.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
