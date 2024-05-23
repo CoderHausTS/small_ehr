@@ -9,10 +9,11 @@
 <br />
 <div align="center">
   <a href="https://github.com/CoderHausTS/smallEHR">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="images/logo_small_txp.png.png" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">smallEHR</h3>
+<h4 align="center">Empowering Technology Learning in Healthcare</h4>
 
   <p align="center">
     Limited purpose Electronic Health Record system. 
@@ -64,7 +65,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+[![Product Name Screen Shot][product-screenshot]]
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -74,9 +75,9 @@
 ### Built With
 
 * Rust
+* Diesel
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- GETTING STARTED -->
@@ -93,18 +94,25 @@ To get a local copy up and running follow these simple example steps. (TBD)
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+1. Clone the repo
    ```sh
    git clone https://github.com/CoderHausTS/smallEHR.git
    ```
-3. Install NPM packages
+2. Install crates
    ```sh
-   npm install
+   cargo install blah
    ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
+3. Spin up PostgreSQL docker container
+   ```sh
+   docker run -----
+   ```
+4. Run environment script (maybe)
+   ```sh
+   . ./somescript.sh
+   ```
+5. Build and run
+   ```sh
+   cargo run blah
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -114,9 +122,8 @@ To get a local copy up and running follow these simple example steps. (TBD)
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+This space will show useful examples of how this project can be used. Additional screenshots, code examples and demos will be added.
 
-_For more examples, please refer to the [Documentation](https://example.com)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
