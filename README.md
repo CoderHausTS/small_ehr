@@ -18,15 +18,12 @@
 
   <p align="center">
     Limited purpose Electronic Health Record system. Used to explore ideas in healthcare technology, and as a teaching tool for those who would like to enter the healthcare tech space.
-
     <br />
     <a href="https://github.com/CoderHausTS/smallEHR"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://github.com/CoderHausTS/smallEHR">View Demo</a>
-    ·
     <a href="https://github.com/CoderHausTS/smallEHR/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-    ·
     <a href="https://github.com/CoderHausTS/smallEHR/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
