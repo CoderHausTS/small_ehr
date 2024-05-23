@@ -9,7 +9,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/CoderHausTS/smallEHR">
-    <img src="images/logo_small_txp.png.png" alt="Logo" width="80" height="80">
+    <img src="images/logo_small_txp.png" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">smallEHR</h3>
