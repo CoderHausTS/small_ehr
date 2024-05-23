@@ -113,6 +113,9 @@ To get a local copy up and running follow these simple example steps. (TBD)
    cargo run blah
    ```
 
+### Post install
+1. Import data
+   Use synthetic data if you are testing. A good resource is [Mitre Synthea](https://synthea.mitre.org/downloads)
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
