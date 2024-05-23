@@ -87,10 +87,8 @@ To get a local copy up and running follow these simple example steps. (TBD)
 
 ### Prerequisites
 
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+* rust 
+  * Install rust following the [official documentation](https://www.rust-lang.org/learn/get-started)
 
 ### Installation
 
@@ -104,7 +102,7 @@ To get a local copy up and running follow these simple example steps. (TBD)
    ```
 3. Spin up PostgreSQL docker container
    ```sh
-   docker run -----
+   docker compose up
    ```
 4. Run environment script (maybe)
    ```sh
