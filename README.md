@@ -89,6 +89,10 @@ To get a local copy up and running follow these simple example steps. (TBD)
 
 * rust 
   * Install rust following the [official documentation](https://www.rust-lang.org/learn/get-started)
+* postgreSQL client
+* mysqlclient (for Diesel CLI)
+* sqlite3 (for Diesel CLI)
+* diesel_cli crate - follow the docs at [https://diesel.rs/guides/getting-started](https://diesel.rs/guides/getting-started)
 
 ### Installation
 
