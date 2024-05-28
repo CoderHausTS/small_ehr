@@ -1,2 +1,2 @@
 -- This file should undo anything in `up.sql`
-DELETE TABLE immunizations
+DROP TABLE immunizations
