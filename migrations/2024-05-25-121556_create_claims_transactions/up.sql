@@ -25,7 +25,7 @@ CREATE TABLE claims_transactions (
 	OUTSTANDING money,
 	APPOINTMENT_ID uuid REFERENCES encounters(id),
 	LINENOTE text,
-	PATIENT_INSURANCE_ID uuid REFERENCES payer_transitions(id),
+	PATIENT_INSURANCE_ID uuid, -- REFERENCES payer_transitions(member_id),
 	FEE_SCHEDULE_ID smallint,
 	PROVIDER_ID uuid NOT NULL REFERENCES providers(id),
 	SUPERVISING_PROVIDER_ID uuid REFERENCES providers(id)

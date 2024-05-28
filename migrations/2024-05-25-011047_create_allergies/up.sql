@@ -1,5 +1,6 @@
 -- Your SQL goes here
 CREATE TABLE allergies (
+	id uuid NOT NULL PRIMARY KEY,
 	START date,
 	STOP date,
 	PATIENT uuid NOT NULL REFERENCES patients(id),
