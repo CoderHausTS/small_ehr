@@ -1,14 +1,12 @@
 -- Your SQL goes here
-CREATE TABLE supplies {
-	
-	DATE,
-	PATIENT,
-	ENCOUNTER,
-	CODE,
-	DESCRIPTION,
-	QUANTITY
-
-}
+CREATE TABLE supplies (
+	DATE date NOT NULL,
+	PATIENT_ID uuid NOT NULL REFERENCES patients(id) ,
+	ENCOUNTER_ID uuid NOT NULL REFERENCES encounters(id),
+	SNOMED_CODE text NOT NULL,
+	DESCRIPTION text NOT NULL,
+	QUANTITY smallint NOT NULL
+)
 --s
 --s2021-02-08,
 --s8fa5a097-1970-9370-4193-a7baa3d235b5,
