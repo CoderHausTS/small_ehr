@@ -1,17 +1,15 @@
 -- Your SQL goes here
-CREATE TABLE observations {
-
-	DATE,
-	PATIENT,
-	ENCOUNTER,
-	CATEGORY,
-	CODE,
-	DESCRIPTION,
-	VALUE,
-	UNITS,
-	TYPE
-
-}
+CREATE TABLE observations (
+	DATE timestamp NOT NULL,
+	PATIENT_ID uuid NOT NULL REFERENCES patients(id),
+	ENCOUNTER_ID uuid NOT NULL REFERENCES encounters(id),
+	CATEGORY text,
+	CODE text,
+	DESCRIPTION text,
+	VALUE text,
+	UNITS text,
+	TYPE text
+)
 --s
 --s2019-02-17T05:07:38Z,
 --sb9c610cd-28a6-4636-ccb6-c7a0d2a4cb85,
