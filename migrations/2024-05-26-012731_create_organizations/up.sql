@@ -1,19 +1,18 @@
 -- Your SQL goes here
-CREATE TABLE organizations {
+CREATE TABLE organizations (
 	
-	Id,
-	NAME,
-	ADDRESS,
-	CITY,
-	STATE,
-	ZIP,
-	LAT,
-	LON,
-	PHONE,
-	REVENUE,
-	UTILIZATION
-
-}
+	id uuid PRIMARY KEY NOT NULL ,
+	NAME text NOT NULL,
+	ADDRESS text,
+	CITY text,
+	STATE text,
+	ZIP text,
+	LAT text,
+	LON text,
+	PHONE text,
+	REVENUE money,
+	UTILIZATION bigint
+)
 --s
 --sef58ea08-d883-3957-8300-150554edc8fb,
 --sHEALTHALLIANCE HOSPITALS  INC,
