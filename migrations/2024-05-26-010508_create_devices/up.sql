@@ -1,13 +1,13 @@
 -- Your SQL goes here
-CREATE TABLE devices {
-	START,
-	STOP,
-	PATIENT,
-	ENCOUNTER,
-	CODE,
-	DESCRIPTION,
-	UDI
-}
+CREATE TABLE devices (
+	START timestamp NOT NULL,
+	STOP timestamp,
+	PATIENT_ID uuid NOT NULL REFERENCES patients(id),
+	ENCOUNTER_ID uuid NOT NULL REFERENCES encounters(id),
+	SNOMED_CODE text,
+	DESCRIPTION text,
+	UDI text
+)
 --s
 --s2017-09-25T17:26:19Z,
 --s,
