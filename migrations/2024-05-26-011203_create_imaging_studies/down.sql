@@ -1,2 +1,2 @@
 -- This file should undo anything in `up.sql`
-DELETE TABLE imaging_studies
+DROP TABLE imaging_studies
