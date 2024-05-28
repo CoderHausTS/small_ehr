@@ -1,7 +1,7 @@
 -- Your SQL goes here
 CREATE TABLE allergies (
-	START timestamp,
-	STOP timestamp,
+	START date,
+	STOP date,
 	PATIENT uuid NOT NULL REFERENCES patients(id),
 	ENCOUNTER uuid NOT NULL REFERENCES encounters(id), 
 	CODE text,
