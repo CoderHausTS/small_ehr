@@ -1,12 +1,12 @@
 -- Your SQL goes here
-CREATE TABLE conditions {
-START,
-STOP,
-PATIENT,
-ENCOUNTER,
-CODE,
-DESCRIPTION
-}
+CREATE TABLE conditions (
+	START timestamp NOT NULL, 
+	STOP timestamp,
+	PATIENT_ID uuid NOT NULL REFERENCES patients(id),
+	ENCOUNTER_ID uuid NOT NULL REFERENCES encounters(id),
+	SNOMED_CODE text,
+	DESCRIPTION text
+)
 --
 --2013-06-24,
 --2013-07-02,
