@@ -1,5 +1,6 @@
 -- Your SQL goes here
 CREATE TABLE observations (
+	id uuid PRIMARY KEY,
 	DATE timestamp NOT NULL,
 	PATIENT_ID uuid NOT NULL REFERENCES patients(id),
 	ENCOUNTER_ID uuid NOT NULL REFERENCES encounters(id),

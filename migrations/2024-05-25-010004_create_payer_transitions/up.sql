@@ -1,5 +1,6 @@
 -- Your SQL goes here
 CREATE TABLE payer_transitions (
+	id uuid PRIMARY KEY,
 	PATIENT_ID uuid NOT NULL REFERENCES patients(id),
 	MEMBER_ID uuid,
 	START_YEAR date NOT NULL,

@@ -1,5 +1,6 @@
 -- Your SQL goes here
 CREATE TABLE conditions (
+	id uuid PRIMARY KEY,
 	START timestamp NOT NULL, 
 	STOP timestamp,
 	PATIENT_ID uuid NOT NULL REFERENCES patients(id),

@@ -1,5 +1,6 @@
--- Your SQL goes here
+-- Your SQL goes herej
 CREATE TABLE devices (
+	id uuid PRIMARY KEY,
 	START timestamp NOT NULL,
 	STOP timestamp,
 	PATIENT_ID uuid NOT NULL REFERENCES patients(id),
