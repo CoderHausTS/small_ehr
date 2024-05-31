@@ -4,6 +4,7 @@ use dotenv::dotenv;
 
 use std::env;
 use std::fs::File;
+use std::io;
 use std::io::prelude::*;
 
 use clap::{Parser, Subcommand, ValueEnum};
@@ -11,9 +12,9 @@ use clap::{Parser, Subcommand, ValueEnum};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 
-// used for testing file work
+pub mod schema;
+pub mod models;
 
-// Simple program to greet a person
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Cli {
@@ -65,6 +66,12 @@ pub fn establish_connection() -> PgConnection {
 pub fn csv_import_initialization(location: String, db_connection: &PgConnection) -> std::io::Result<File> {
     // ask what table this data goes into. 
     //
+    let mut input = String::new();
+    
+    print!("Please enter the table you would like to import in to: ");
+    let _ = io::stdout().flush();
+
+    io::stdin().read_line(&mut input)?;
 
     // Get the table metadata to see how many fields
     // 
