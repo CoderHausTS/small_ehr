@@ -5,12 +5,14 @@ use chrono::prelude::*;
 #[derive(Queryable, Selectable)]
 #[diesel(table_name = crate::schema::allergies)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
+#[diesel(belongs_to(patient))]
+#[diesel(belongs_to(encounter))]
 pub struct Allergy {
     pub id: Uuid,
     pub start: Option<NaiveDate>,
     pub stop: Option<NaiveDate>,
-    pub patient: Uuid,
-    pub encounter: Uuid,
+    pub patient_id: Uuid,
+    pub encounter_id: Uuid,
     pub code: Option<String>,
     pub system: Option<String>,
     pub description: Option<String>,

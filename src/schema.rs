@@ -5,8 +5,8 @@ diesel::table! {
         id -> Uuid,
         start -> Nullable<Date>,
         stop -> Nullable<Date>,
-        patient -> Uuid,
-        encounter -> Uuid,
+        patient_id -> Uuid,
+        encounter_id -> Uuid,
         code -> Nullable<Text>,
         system -> Nullable<Text>,
         description -> Nullable<Text>,
@@ -22,8 +22,8 @@ diesel::table! {
         id -> Uuid,
         start -> Nullable<Date>,
         stop -> Nullable<Date>,
-        patient -> Nullable<Uuid>,
-        encounter -> Nullable<Uuid>,
+        patient_id -> Nullable<Uuid>,
+        encounter_id -> Nullable<Uuid>,
         code -> Nullable<Text>,
         description -> Nullable<Text>,
         reasoncode -> Nullable<Text>,
@@ -71,7 +71,7 @@ diesel::table! {
         payement_method -> Nullable<Text>,
         from_date -> Nullable<Timestamp>,
         to_date -> Nullable<Timestamp>,
-        place_of_service -> Uuid,
+        place_of_service_id -> Uuid,
         procedure_code -> Text,
         modifiers -> Nullable<Array<Nullable<Text>>>,
         diagnosis_reference -> Nullable<Array<Nullable<Text>>>,
@@ -334,15 +334,15 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(allergies -> encounters (encounter));
-diesel::joinable!(allergies -> patients (patient));
-diesel::joinable!(careplans -> encounters (encounter));
-diesel::joinable!(careplans -> patients (patient));
+diesel::joinable!(allergies -> encounters (encounter_id));
+diesel::joinable!(allergies -> patients (patient_id));
+diesel::joinable!(careplans -> encounters (encounter_id));
+diesel::joinable!(careplans -> patients (patient_id));
 diesel::joinable!(claims -> encounters (appointment_id));
 diesel::joinable!(claims -> patients (patient_id));
 diesel::joinable!(claims_transactions -> claims (claim_id));
 diesel::joinable!(claims_transactions -> encounters (appointment_id));
-diesel::joinable!(claims_transactions -> organizations (place_of_service));
+diesel::joinable!(claims_transactions -> organizations (place_of_service_id));
 diesel::joinable!(claims_transactions -> patients (patient_id));
 diesel::joinable!(conditions -> encounters (encounter_id));
 diesel::joinable!(conditions -> patients (patient_id));

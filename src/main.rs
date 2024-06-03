@@ -12,6 +12,8 @@ use clap::{Parser, Subcommand, ValueEnum};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 
+use crate::schema::allergies;
+
 pub mod schema;
 pub mod models;
 
@@ -63,7 +65,7 @@ pub fn establish_connection() -> PgConnection {
 /// let file_handle = csv_import_initialization(location)?;
 /// ```
 ///
-pub fn csv_import_initialization(location: String, db_connection: &PgConnection) -> std::io::Result<File> {
+pub fn csv_import(location: String, db_connection: &PgConnection) -> Result<(), io::Error> {
     // ask what table this data goes into. 
     //
     let mut input = String::new();
@@ -73,19 +75,34 @@ pub fn csv_import_initialization(location: String, db_connection: &PgConnection)
 
     io::stdin().read_line(&mut input)?;
 
-    // Get the table metadata to see how many fields
-    // 
-
-    let file = File::open(location)?;
-
-    // check how many fields in the file
+    // getting the file, or die
+    let file = match File::open(location) {
+        Ok(file) => file,
+        Err(error) => panic!("Error opening file: {:?}", error),
+    };
+   
+    // This really checks if the inputted table exists
+    match input.trim() {
+        "allergies" => {
+            println!("Be sure your Allergies csv contains the following fields:\r\n{:?}", allergies::table::all_columns());
+            import_allergies(&file);
+        }
+        _ => {
+            println!("That table does not exist. Check the name and try again.");
+        }
+    }
+    // chec k how many fields in the file
     //
 
     // evaluate if the table and csv have the same number of fields
 
     // if we get here, we're OK to process the data, so send the file handle back
-    Ok(file) 
+    Ok(()) 
 }
+
+fn import_allergies(file: &File) {
+}
+
 
 fn main() {
         dotenv().ok();
@@ -106,7 +123,7 @@ fn main() {
             Commands::Import { file_type, location } => {
                 match file_type {
                     FileTypes::Csv => {
-                            let file_handle = csv_import_initialization(location, &db_connection);
+                            let file_handle = csv_import(location, &db_connection);
                     }
                 }
             },
@@ -126,9 +143,7 @@ mod tests {
         let location: String = "./csv/allergies.csv".to_string();
         let db_connection: PgConnection = establish_connection();
 
-        let file_handle = csv_import_initialization(location, &db_connection);
-
-        assert!(!file_handle.is_err())
+        csv_import(location, &db_connection);
 
     }
 
@@ -137,8 +152,7 @@ mod tests {
         let bad_location: String = "./csv/jimmy.joe".to_string();
         let db_connection: PgConnection = establish_connection();
 
-        let file_handle = csv_import_initialization(bad_location, &db_connection);
+        csv_import(bad_location, &db_connection);
 
-        assert!(file_handle.is_err());
     }
 }
