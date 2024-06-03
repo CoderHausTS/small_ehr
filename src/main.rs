@@ -33,6 +33,7 @@ enum Commands {
     Import {
         #[arg(required = true)]
         file_type: FileTypes,
+        table: Tables,
         location: String,
     },
     Run,
@@ -43,6 +44,11 @@ enum FileTypes {
     Csv,
 }
 
+#[derive(ValueEnum, Subcommand, Clone)]
+enum Tables {
+    Allergies,
+}
+
 pub fn establish_connection() -> PgConnection {
         dotenv().ok();
 
@@ -51,8 +57,8 @@ pub fn establish_connection() -> PgConnection {
             .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
 
-/// csv_import_intitialization(location:String, db_connection: PgConnection) 
-/// returns: Result<FIle>
+/// csv_import_intitialization(table:Table, location:String, db_connection: PgConnection) 
+/// returns: Result<>
 /// This function 
 ///     takes in the location of  csv file for import,
 ///     asks what table the data goes into (csv we are assuming have a specific set of data)
@@ -61,29 +67,14 @@ pub fn establish_connection() -> PgConnection {
 /// 
 /// at any point it could return a result, or an error
 ///
-/// let location = ./csv/allergies.csv;
-/// let file_handle = csv_import_initialization(location)?;
-/// ```
-///
-pub fn csv_import(location: String, db_connection: &PgConnection) -> Result<(), io::Error> {
-    // ask what table this data goes into. 
-    //
-    let mut input = String::new();
+pub fn csv_import(table: Tables, location: String, db_connection: &PgConnection) -> io::Result<()> {
     
-    print!("Please enter the table you would like to import in to: ");
-    let _ = io::stdout().flush();
-
-    io::stdin().read_line(&mut input)?;
-
     // getting the file, or die
-    let file = match File::open(location) {
-        Ok(file) => file,
-        Err(error) => panic!("Error opening file: {:?}", error),
-    };
+    let file = File::open(location)?;
    
     // This really checks if the inputted table exists
-    match input.trim() {
-        "allergies" => {
+    match table {
+        Tables::Allergies => {
             println!("Be sure your Allergies csv contains the following fields:\r\n{:?}", allergies::table::all_columns());
             import_allergies(&file);
         }
@@ -120,10 +111,11 @@ fn main() {
         let cli = Cli::parse();
 
         match cli.commands {
-            Commands::Import { file_type, location } => {
+            Commands::Import { file_type, table, location } => {
                 match file_type {
                     FileTypes::Csv => {
-                            let file_handle = csv_import(location, &db_connection);
+
+                            let file_handle = csv_import(table, location, &db_connection);
                     }
                 }
             },
@@ -139,20 +131,20 @@ mod tests {
     use super::*;
 
     #[test]
-    fn csv_import_initialization_returns_file_handle() {
+    fn csv_import_initialization_doesnt_die() {
         let location: String = "./csv/allergies.csv".to_string();
         let db_connection: PgConnection = establish_connection();
 
-        csv_import(location, &db_connection);
+        assert!(csv_import(Tables::Allergies, location, &db_connection).is_ok(), "CSV import finished" ); 
 
     }
 
     #[test]
-    fn csv_import_initialization_returns_failure() {
+    fn csv_import_initialization_fails() {
         let bad_location: String = "./csv/jimmy.joe".to_string();
         let db_connection: PgConnection = establish_connection();
 
-        csv_import(bad_location, &db_connection);
+        assert!(csv_import(Tables::Allergies, bad_location, &db_connection).is_err(), "CSV file doesn't exist");
 
     }
 }
