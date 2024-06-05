@@ -1,10 +1,13 @@
 extern crate dotenv;
 
+use csv::Reader;
 use dotenv::dotenv;
 
 use std::env;
 use std::fs::File;
 use std::io;
+use std::io::Cursor;
+use std::error::Error;
 use std::io::prelude::*;
 
 use clap::{Parser, Subcommand, ValueEnum};
@@ -12,6 +15,7 @@ use clap::{Parser, Subcommand, ValueEnum};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 
+use crate::models::Allergy;
 use crate::schema::allergies;
 
 pub mod schema;
@@ -71,12 +75,20 @@ pub fn csv_import(table: Tables, location: String, db_connection: &PgConnection)
     
     // getting the file, or die
     let file = File::open(location)?;
+    let mut csv_file = csv::Reader::from_reader(&file);
    
+    {
+    // get the headers to print out with the table info.
+        let csv_headers = csv_file.headers()?;
+        println!("CSV file has the following fields: ");
+        println!("{:?}", csv_headers);
+    }
+
     // This really checks if the inputted table exists
     match table {
         Tables::Allergies => {
-            println!("Be sure your Allergies csv contains the following fields:\r\n{:?}", allergies::table::all_columns());
-            import_allergies(&file);
+            println!("Be sure the csv contains the following fields:\r\n{:?}", allergies::table::all_columns());
+            import_allergies(&csv_file);
         }
         _ => {
             println!("That table does not exist. Check the name and try again.");
@@ -91,7 +103,10 @@ pub fn csv_import(table: Tables, location: String, db_connection: &PgConnection)
     Ok(()) 
 }
 
-fn import_allergies(file: &File) {
+fn import_allergies(csv_file_reader: &Reader<&File>) -> Result<i32, Box<dyn Error>>{
+    let num_rows: i32 = 0;
+
+    Ok(num_rows)
 }
 
 
@@ -145,6 +160,32 @@ mod tests {
         let db_connection: PgConnection = establish_connection();
 
         assert!(csv_import(Tables::Allergies, bad_location, &db_connection).is_err(), "CSV file doesn't exist");
-
     }
+
+    #[test]
+    fn import_allergies_returns_num_records_imported() {
+        // we need N number of rows, not including header.
+        let num_rows = 3;
+
+        // create a csv::Reader object to pass in
+        //
+        let data = b"\
+                    START, STOP, PATIENT_ID, ENCOUNTER_ID, CODE, SYSTEM, DESCRIPTION, TYPE, CATEGORY, SNOMED
+                    2020-02-17,,b9c610cd-28a6-4636-ccb6-c7a0d2a4cb85,01efcc52-15d6-51e9-faa2-bee069fcbe44,111088007,Unknown,Latex (substance),allergy,environment,247472004,Wheal (finding),MILD,,,
+                    2020-02-17,,b9c610cd-28a6-4636-ccb6-c7a0d2a4cb85,01efcc52-15d6-51e9-faa2-bee069fcbe44,84489001,Unknown,Mold (organism),allergy,environment,76067001,Sneezing,MILD,,,
+                    2020-02-17,,b9c610cd-28a6-4636-ccb6-c7a0d2a4cb85,01efcc52-15d6-51e9-faa2-bee069fcbe44,260147004,Unknown,House dust mite (organism),allergy,environment,,,,,,
+                    ";
+
+        let dir = env::temp_dir();
+        let mut f = File::create(dir.as_path().join("foo.txt")).unwrap(); 
+
+        f.write_all(data);
+        let mut rdr = csv::Reader::from_reader(&f);
+        // call the fn
+        //
+        let import_result = import_allergies(&rdr);
+
+        // assert Ok()
+        assert_eq!(import_result.unwrap(), num_rows);
+        }
 }
