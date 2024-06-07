@@ -5,7 +5,7 @@ use dotenv::dotenv;
 
 use std::env;
 use std::fs::File;
-use std::io;
+use std::io::{self, BufReader};
 use std::io::Cursor;
 use std::error::Error;
 use std::io::prelude::*;
@@ -88,7 +88,7 @@ pub fn csv_import(table: Tables, location: String, db_connection: &PgConnection)
     match table {
         Tables::Allergies => {
             println!("Be sure the csv contains the following fields:\r\n{:?}", allergies::table::all_columns());
-            import_allergies(&csv_file);
+            import_allergies(&mut csv_file);
         }
         _ => {
             println!("That table does not exist. Check the name and try again.");
@@ -103,9 +103,26 @@ pub fn csv_import(table: Tables, location: String, db_connection: &PgConnection)
     Ok(()) 
 }
 
-fn import_allergies(csv_file_reader: &Reader<&File>) -> Result<i32, Box<dyn Error>>{
+fn import_allergies(csv_file_reader: &mut Reader<&File>) -> Result<i32, Box<dyn Error>>{
     let num_rows: i32 = 0;
+   
+    // get data from file
+    //
+    for csv_record in csv_file_reader.records() {
+        // Notice that we need to provide a type hint for automatic
+        // deserialization.
+        let record = csv_record?;
+        println!("The record is {:?}", record);
 
+        // push data into allergies table
+        //
+ 
+    }
+                
+    // verify number of records written equals number of records in file
+    //
+
+    // Return number of rows written
     Ok(num_rows)
 }
 
@@ -169,21 +186,29 @@ mod tests {
 
         // create a csv::Reader object to pass in
         //
-        let data = b"\
+        let data = b"
                     START, STOP, PATIENT_ID, ENCOUNTER_ID, CODE, SYSTEM, DESCRIPTION, TYPE, CATEGORY, SNOMED
-                    2020-02-17,,b9c610cd-28a6-4636-ccb6-c7a0d2a4cb85,01efcc52-15d6-51e9-faa2-bee069fcbe44,111088007,Unknown,Latex (substance),allergy,environment,247472004,Wheal (finding),MILD,,,
-                    2020-02-17,,b9c610cd-28a6-4636-ccb6-c7a0d2a4cb85,01efcc52-15d6-51e9-faa2-bee069fcbe44,84489001,Unknown,Mold (organism),allergy,environment,76067001,Sneezing,MILD,,,
-                    2020-02-17,,b9c610cd-28a6-4636-ccb6-c7a0d2a4cb85,01efcc52-15d6-51e9-faa2-bee069fcbe44,260147004,Unknown,House dust mite (organism),allergy,environment,,,,,,
+                    2020-02-17,,b9c610cd-28a6-4636-ccb6-c7a0d2a4cb85,01efcc52-15d6-51e9-faa2-bee069fcbe44,111088007,Unknown,Latex (substance),allergy,environment,247472004
+                    2020-02-17,,b9c610cd-28a6-4636-ccb6-c7a0d2a4cb85,01efcc52-15d6-51e9-faa2-bee069fcbe44,84489001,Unknown,Mold (organism),allergy,environment,76067001
+                    2020-02-17,,b9c610cd-28a6-4636-ccb6-c7a0d2a4cb85,01efcc52-15d6-51e9-faa2-bee069fcbe44,260147004,Unknown,House dust mite (organism),allergy,environment,
                     ";
 
         let dir = env::temp_dir();
-        let mut f = File::create(dir.as_path().join("foo.txt")).unwrap(); 
 
-        f.write_all(data);
+        let mut f = std::fs::OpenOptions::new()
+            .create(true)
+            .write(true)
+            .read(true)
+            .open(dir.as_path().join("foo.txt"))
+            .unwrap();
+        
+        let output =  f.write_all(data); 
+
+        f.rewind(); 
+
         let mut rdr = csv::Reader::from_reader(&f);
-        // call the fn
-        //
-        let import_result = import_allergies(&rdr);
+
+        let import_result = import_allergies(&mut rdr);
 
         // assert Ok()
         assert_eq!(import_result.unwrap(), num_rows);
