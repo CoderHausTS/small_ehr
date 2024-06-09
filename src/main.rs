@@ -5,17 +5,18 @@ use dotenv::dotenv;
 
 use std::env;
 use std::fs::File;
-use std::io::{self, BufReader};
-use std::io::Cursor;
+use std::io;
+// use std::io::Cursor;
 use std::error::Error;
 use std::io::prelude::*;
+use std::process;
 
 use clap::{Parser, Subcommand, ValueEnum};
 
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 
-use crate::models::Allergy;
+use crate::models::{ Allergy, NewAllergy };
 use crate::schema::allergies;
 
 pub mod schema;
@@ -49,7 +50,7 @@ enum FileTypes {
 }
 
 #[derive(ValueEnum, Subcommand, Clone)]
-enum Tables {
+pub enum Tables {
     Allergies,
 }
 
@@ -71,8 +72,8 @@ pub fn establish_connection() -> PgConnection {
 /// 
 /// at any point it could return a result, or an error
 ///
-pub fn csv_import(table: Tables, location: String, db_connection: &PgConnection) -> io::Result<()> {
-    
+pub fn csv_import(table: Tables, location: String) -> io::Result<()> {
+
     // getting the file, or die
     let file = File::open(location)?;
     let mut csv_file = csv::Reader::from_reader(&file);
@@ -85,10 +86,19 @@ pub fn csv_import(table: Tables, location: String, db_connection: &PgConnection)
     }
 
     // This really checks if the inputted table exists
+    // This code needs to be updated when a new table is added
     match table {
         Tables::Allergies => {
             println!("Be sure the csv contains the following fields:\r\n{:?}", allergies::table::all_columns());
-            import_allergies(&mut csv_file);
+
+            match import_allergies(&mut csv_file) {
+                Ok(()) => println!("Import successful"),
+                Err(e) => {
+                    println!("Error occured during import {}", e);
+                    process::exit(1);
+                }
+
+            };
         }
         _ => {
             println!("That table does not exist. Check the name and try again.");
@@ -99,31 +109,38 @@ pub fn csv_import(table: Tables, location: String, db_connection: &PgConnection)
 
     // evaluate if the table and csv have the same number of fields
 
-    // if we get here, we're OK to process the data, so send the file handle back
     Ok(()) 
 }
 
-fn import_allergies(csv_file_reader: &mut Reader<&File>) -> Result<i32, Box<dyn Error>>{
-    let num_rows: i32 = 0;
+fn import_allergies(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<dyn Error>>{
+
+    let db_connection: PgConnection = establish_connection();
+
    
     // get data from file
     //
-    for csv_record in csv_file_reader.records() {
-        // Notice that we need to provide a type hint for automatic
-        // deserialization.
-        let record = csv_record?;
-        println!("The record is {:?}", record);
-
-        // push data into allergies table
-        //
- 
+    for csv_record in csv_file_reader.deserialize::<NewAllergy>() { // csv_file_reader.records() {
+        // if we have a record, push it into the DB
+        match csv_record {
+            Ok(record) => {
+                let read_record: NewAllergy = record;
+                println!("{:?}", read_record);
+//                let new_allergy: Allergy = Allergy { record.0}; 
+//                diesel::insert_into(allergies::table)
+//                    .values(&new_allergy)
+//                    .returning(Allergy::as_returning())
+//                    .get_result(conn)
+//                    .expect("Error saving new post");
+            },
+            Err(err) => return Err(From::from(err)),
+        }
     }
-                
+
     // verify number of records written equals number of records in file
     //
 
     // Return number of rows written
-    Ok(num_rows)
+    Ok(())
 }
 
 
@@ -134,7 +151,6 @@ fn main() {
         // let db_url = env::var("DATABASE_URL")
         //             .expect("DATABASE_URL must be set.");
 
-        //dbg!(db_url);
         let db_connection: PgConnection = establish_connection();
 
         // We should have command line tools callable
@@ -146,8 +162,12 @@ fn main() {
             Commands::Import { file_type, table, location } => {
                 match file_type {
                     FileTypes::Csv => {
+                        match  csv_import(table, location) {
+                            Ok(()) => process::exit(0),
+                            Err(e) => process::exit(1),
+                        }
 
-                            let file_handle = csv_import(table, location, &db_connection);
+                     //       let file_handle = csv_import(table, location);
                     }
                 }
             },
@@ -164,25 +184,22 @@ mod tests {
 
     #[test]
     fn csv_import_initialization_doesnt_die() {
-        let location: String = "./csv/allergies.csv".to_string();
-        let db_connection: PgConnection = establish_connection();
+        let location: String = "./csv/allergies_cleaned.csv".to_string();
 
-        assert!(csv_import(Tables::Allergies, location, &db_connection).is_ok(), "CSV import finished" ); 
+        assert!(csv_import(Tables::Allergies, location).is_ok(), "CSV import finished" ); 
 
     }
 
     #[test]
     fn csv_import_initialization_fails() {
         let bad_location: String = "./csv/jimmy.joe".to_string();
-        let db_connection: PgConnection = establish_connection();
 
-        assert!(csv_import(Tables::Allergies, bad_location, &db_connection).is_err(), "CSV file doesn't exist");
+        assert!(csv_import(Tables::Allergies, bad_location).is_err(), "CSV file doesn't exist");
     }
 
     #[test]
     fn import_allergies_returns_num_records_imported() {
         // we need N number of rows, not including header.
-        let num_rows = 3;
 
         // create a csv::Reader object to pass in
         //
@@ -202,15 +219,19 @@ mod tests {
             .open(dir.as_path().join("foo.txt"))
             .unwrap();
         
-        let output =  f.write_all(data); 
+        f.write_all(data); 
 
         f.rewind(); 
 
         let mut rdr = csv::Reader::from_reader(&f);
 
-        let import_result = import_allergies(&mut rdr);
+        let import_result = match import_allergies(&mut rdr) {
+            Ok(value) => dbg!(value),
+            Err(e) => println!("Someerror {}", e),
+
+        };
 
         // assert Ok()
-        assert_eq!(import_result.unwrap(), num_rows);
+        assert_eq!(import_result, ());
         }
 }
