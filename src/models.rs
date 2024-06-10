@@ -45,7 +45,7 @@ pub struct NewAllergy {
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Patient {
     pub id: Uuid,
-    pub bithdate: NaiveDate,
+    pub birthdate: NaiveDate,
     pub deathdate: Option<NaiveDate>,
     pub ssn: Option<String>,
     pub drivers: Option<String>,
@@ -75,7 +75,7 @@ pub struct Patient {
 #[diesel(table_name = crate::schema::patients)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct NewPatient {
-    pub bithdate: NaiveDate,
+    pub birthdate: NaiveDate,
     pub deathdate: Option<NaiveDate>,
     pub ssn: Option<String>,
     pub drivers: Option<String>,
