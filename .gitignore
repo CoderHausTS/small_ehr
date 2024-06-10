@@ -17,3 +17,6 @@ Cargo.lock
 # Added by cargo
 
 /target
+
+# Don't grab the synthetic data, or any other data in csv directory
+csv/

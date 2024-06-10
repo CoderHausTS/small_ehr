@@ -89,6 +89,10 @@ To get a local copy up and running follow these simple example steps. (TBD)
 
 * rust 
   * Install rust following the [official documentation](https://www.rust-lang.org/learn/get-started)
+* postgreSQL client
+* mysqlclient (for Diesel CLI)
+* sqlite3 (for Diesel CLI)
+* diesel_cli crate - follow the docs at [https://diesel.rs/guides/getting-started](https://diesel.rs/guides/getting-started)
 
 ### Installation
 
@@ -113,6 +117,9 @@ To get a local copy up and running follow these simple example steps. (TBD)
    cargo run blah
    ```
 
+### Post install
+1. Import data
+   Use synthetic data if you are testing. A good resource is [Mitre Synthea](https://synthea.mitre.org/downloads)
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
