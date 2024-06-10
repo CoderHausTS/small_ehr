@@ -52,17 +52,13 @@ enum FileTypes {
 #[derive(ValueEnum, Subcommand, Clone)]
 pub enum Tables {
     Allergies,
-}
-
-pub fn establish_connection() -> PgConnection {
-        dotenv().ok();
 
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
         PgConnection::establish(&database_url)
             .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
 
-/// csv_import_intitialization(table:Table, location:String, db_connection: PgConnection) 
+/// csv_import_intitialization(table:Table, location) 
 /// returns: Result<>
 /// This function 
 ///     takes in the location of  csv file for import,
@@ -104,42 +100,34 @@ pub fn csv_import(table: Tables, location: String) -> io::Result<()> {
             println!("That table does not exist. Check the name and try again.");
         }
     }
-    // chec k how many fields in the file
-    //
-
-    // evaluate if the table and csv have the same number of fields
 
     Ok(()) 
 }
 
 fn import_allergies(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<dyn Error>>{
 
-    let db_connection: PgConnection = establish_connection();
+    let db_connection = &mut establish_connection();
 
    
     // get data from file
     //
+    let mut import_count: usize = 0;
     for csv_record in csv_file_reader.deserialize::<NewAllergy>() { // csv_file_reader.records() {
         // if we have a record, push it into the DB
         match csv_record {
             Ok(record) => {
-                let read_record: NewAllergy = record;
-                println!("{:?}", read_record);
-//                let new_allergy: Allergy = Allergy { record.0}; 
-//                diesel::insert_into(allergies::table)
-//                    .values(&new_allergy)
-//                    .returning(Allergy::as_returning())
-//                    .get_result(conn)
-//                    .expect("Error saving new post");
+                let new_allergy: NewAllergy = record;
+                import_count += diesel::insert_into(allergies::table)
+                    .values(&new_allergy)
+                    // .returning(Allergy::as_returning())
+                    .execute(db_connection)
+                    .expect("Error saving new post");
             },
             Err(err) => return Err(From::from(err)),
         }
     }
-
-    // verify number of records written equals number of records in file
-    //
-
-    // Return number of rows written
+    println!("Imported {}", import_count);
+  
     Ok(())
 }
 
