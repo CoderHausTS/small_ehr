@@ -18,5 +18,9 @@ df['SNOMED'] = ("( " + df[['REACTION1', 'DESCRIPTION1', 'SEVERITY1']]
 
 # Get the old columns out of here
 df.drop(columns = ['REACTION1', 'DESCRIPTION2', 'SEVERITY1', 'REACTION2', 'DESCRIPTION2', 'SEVERITY2'], inplace=True)
+df.rename(columns = str.lower, inplace=True)
+
+# get all UUIDs from patient file and randomly plce them in this file
+
 
 df.to_csv("csv/allergies_cleaned.csv", index=False)
