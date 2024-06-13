@@ -1,7 +1,8 @@
-use diesel::prelude::*;
+use diesel::{prelude::*, sql_types::{BigInt, Float}};
 use uuid::Uuid;
 use chrono::prelude::*;
 use serde::Deserialize;
+use bigdecimal::BigDecimal;
 
 #[derive(Queryable, Selectable, Deserialize, Debug)]
 #[diesel(table_name = crate::schema::allergies)]
@@ -100,3 +101,36 @@ pub struct NewPatient {
     pub healthcare_expenses: Option<String>,
     pub healthcare_coverage: Option<String>,
 }
+
+#[derive(Queryable, Selectable, Deserialize, Debug)]
+#[diesel(table_name = crate::schema::organizations)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct Organization {
+    pub id: Uuid,
+    pub name: String,
+    pub address: Option<String>,
+    pub city: Option<String>,
+    pub state : Option<String>,
+    pub zip: Option<String>,
+    pub lat: Option<String>,
+    pub lon: Option<String>,
+    pub phone: Option<String>,
+    pub revenue : Option<BigDecimal>,
+    pub utilization: Option<i32>,
+}
+
+#[derive(Insertable, Selectable, Deserialize, Debug)]
+#[diesel(table_name = crate::schema::organizations)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct NewOrganization {
+    pub name: String,
+    pub address: Option<String>,
+    pub city: Option<String>,
+    pub state : Option<String>,
+    pub zip: Option<String>,
+    pub lat: Option<String>,
+    pub lon: Option<String>,
+    pub phone: Option<String>,
+    pub revenue : Option<BigDecimal>,
+    pub utilization: Option<i32>,
+}  

@@ -215,8 +215,8 @@ diesel::table! {
         lat -> Nullable<Text>,
         lon -> Nullable<Text>,
         phone -> Nullable<Text>,
-        revenue -> Nullable<Money>,
-        utilization -> Nullable<Int8>,
+        revenue -> Nullable<Numeric>,
+        utilization -> Nullable<Integer>,
     }
 }
 
