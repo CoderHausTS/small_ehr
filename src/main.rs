@@ -53,6 +53,7 @@ enum FileTypes {
 pub enum Tables {
     Allergies,
     Patients,
+    Organizations,
 }
 
 pub fn establish_connection() -> PgConnection {
@@ -104,6 +105,18 @@ pub fn csv_import(table: Tables, location: String) -> io::Result<()> {
             // println!("Be sure the csv contains the following fields:\r\n{:?}", patients::table::all_columns());
 
             match import_patients(&mut csv_file) {
+                Ok(()) => println!("Import successful"),
+                Err(e) => {
+                    println!("Error occured during import {}", e);
+                    process::exit(1);
+                }
+
+            };
+        }
+        Tables::Organizations => {
+            // println!("Be sure the csv contains the following fields:\r\n{:?}", patients::table::all_columns());
+
+            match import_organizations(&mut csv_file) {
                 Ok(()) => println!("Import successful"),
                 Err(e) => {
                     println!("Error occured during import {}", e);
