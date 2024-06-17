@@ -3,12 +3,12 @@ extern crate dotenv;
 use csv::Reader;
 use dotenv::dotenv;
 
-use std::env;
+// use std::env;
 use std::fs::File;
 use std::io;
 // use std::io::Cursor;
 use std::error::Error;
-use std::io::prelude::*;
+// use std::io::prelude::*;
 use std::process;
 
 use clap::{Parser, Subcommand, ValueEnum};
@@ -22,50 +22,9 @@ use crate::schema::{ allergies, patients, organizations };
 pub mod schema;
 pub mod models;
 
-#[derive(Parser)]
-#[command(version, about, long_about = None)]
-struct Cli {
-    // #[arg(short, long)]
-    // use a subcommand, that's an enum pointing to the 
-    // file type and the file location
-    #[command(subcommand)]
-    commands: Commands,
-}
-
-#[derive(Subcommand)]
-enum Commands {
-    #[command(arg_required_else_help = false)]
-    Import {
-        #[arg(required = true)]
-        file_type: FileTypes,
-        table: Tables,
-        location: String,
-    },
-    Run,
-}
-
-#[derive(ValueEnum, Subcommand, Clone)] 
-enum FileTypes {
-    Csv,
-}
-
-#[derive(ValueEnum, Subcommand, Clone)]
-pub enum Tables {
-    Allergies,
-    Patients,
-    Organizations,
-}
-
-pub fn establish_connection() -> PgConnection {
-        dotenv().ok();
-        let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-        PgConnection::establish(&database_url)
-            .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
-}
-
-/// csv_import_intitialization(table:Table, location) 
-/// returns: Result<>
-/// This function 
+/// csv_import_intitialization(table:table, location) 
+/// returns: result<>
+/// this function 
 ///     takes in the location of  csv file for import,
 ///     asks what table the data goes into (csv we are assuming have a specific set of data)
 ///     opens the file
@@ -73,64 +32,64 @@ pub fn establish_connection() -> PgConnection {
 /// 
 /// at any point it could return a result, or an error
 ///
-pub fn csv_import(table: Tables, location: String) -> io::Result<()> {
+pub fn csv_import(table: tables, location: string) -> io::result<()> {
 
     // getting the file, or die
-    let file = File::open(location)?;
-    let mut csv_file = csv::Reader::from_reader(&file);
+    let file = file::open(location)?;
+    let mut csv_file = csv::reader::from_reader(&file);
    
     {
     // get the headers to print out with the table info.
         let csv_headers = csv_file.headers()?;
-        println!("CSV file has the following fields: ");
+        println!("csv file has the following fields: ");
         println!("{:?}", csv_headers);
     }
 
-    // This really checks if the inputted table exists
-    // This code needs to be updated when a new table is added
+    // this really checks if the inputted table exists
+    // this code needs to be updated when a new table is added
     match table {
-        Tables::Allergies => {
-            // println!("Be sure the csv contains the following fields:\r\n{:?}", allergies::table::all_columns());
+        tables::allergies => {
+            // println!("be sure the csv contains the following fields:\r\n{:?}", allergies::table::all_columns());
 
             match import_allergies(&mut csv_file) {
-                Ok(()) => println!("Import successful"),
-                Err(e) => {
-                    println!("Error occured during import {}", e);
+                ok(()) => println!("import successful"),
+                err(e) => {
+                    println!("error occured during import {}", e);
                     process::exit(1);
                 }
 
             };
         }
-        Tables::Patients => {
-            // println!("Be sure the csv contains the following fields:\r\n{:?}", patients::table::all_columns());
+        tables::patients => {
+            // println!("be sure the csv contains the following fields:\r\n{:?}", patients::table::all_columns());
 
             match import_patients(&mut csv_file) {
-                Ok(()) => println!("Import successful"),
-                Err(e) => {
-                    println!("Error occured during import {}", e);
+                ok(()) => println!("import successful"),
+                err(e) => {
+                    println!("error occured during import {}", e);
                     process::exit(1);
                 }
 
             };
         }
-        Tables::Organizations => {
-            // println!("Be sure the csv contains the following fields:\r\n{:?}", patients::table::all_columns());
+        tables::organizations => {
+            // println!("be sure the csv contains the following fields:\r\n{:?}", patients::table::all_columns());
 
             match import_organizations(&mut csv_file) {
-                Ok(()) => println!("Import successful"),
-                Err(e) => {
-                    println!("Error occured during import {}", e);
+                ok(()) => println!("import successful"),
+                err(e) => {
+                    println!("error occured during import {}", e);
                     process::exit(1);
                 }
 
             };
         }
         _ => {
-            println!("That table does not exist. Check the name and try again.");
+            println!("that table does not exist. check the name and try again.");
         }
     }
 
-    Ok(()) 
+    ok(()) 
 }
 
 fn import_allergies(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<dyn Error>>{
@@ -213,39 +172,6 @@ fn import_organizations(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<d
     Ok(())
 }
 
-fn main() {
-        dotenv().ok();
-        
-        // We can get our setup from a .env file. Nice for development!
-        // let db_url = env::var("DATABASE_URL")
-        //             .expect("DATABASE_URL must be set.");
-
-        let db_connection: PgConnection = establish_connection();
-
-        // We should have command line tools callable
-        // So we take command line args.
-        // -- -i <file type> <file location>
-        let cli = Cli::parse();
-
-        match cli.commands {
-            Commands::Import { file_type, table, location } => {
-                match file_type {
-                    FileTypes::Csv => {
-                        match  csv_import(table, location) {
-                            Ok(()) => process::exit(0),
-                            Err(e) => process::exit(1),
-                        }
-
-                     //       let file_handle = csv_import(table, location);
-                    }
-                }
-            },
-            Commands::Run => {
-                println!("Run this app.");
-            }
-        }
-
-}
 
 #[cfg(test)]
 mod tests {
