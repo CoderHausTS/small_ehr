@@ -1,26 +1,54 @@
-extern crate dotenv;
+use database;
 
 use csv::Reader;
-use dotenv::dotenv;
 
-// use std::env;
 use std::fs::File;
 use std::io;
-// use std::io::Cursor;
+use std::io::prelude::*;
+
 use std::error::Error;
-// use std::io::prelude::*;
 use std::process;
 
 use clap::{Parser, Subcommand, ValueEnum};
 
-use diesel::pg::PgConnection;
-use diesel::prelude::*;
+use diesel::RunQueryDsl;
 
-use crate::models::{ Allergy, NewAllergy, Patient, NewPatient, Organization, NewOrganization };
-use crate::schema::{ allergies, patients, organizations };
+use database::models::{ NewAllergy, NewPatient, NewOrganization };
+use database::schema::{ allergies, patients, organizations };
 
-pub mod schema;
-pub mod models;
+#[derive(Parser)]
+#[command(version, about, long_about = None)]
+pub struct Cli {
+    // #[arg(short, long)]
+    // use a subcommand, that's an enum pointing to the 
+    // file type and the file location
+    #[command(subcommand)]
+    pub commands: Commands,
+}
+
+#[derive(Subcommand)]
+pub enum Commands {
+    #[command(arg_required_else_help = false)]
+    Import {
+        #[arg(required = true)]
+        file_type: FileTypes,
+        table: Tables,
+        location: String,
+    },
+    Run,
+}
+
+#[derive(ValueEnum, Subcommand, Clone)] 
+pub enum FileTypes {
+    Csv,
+}
+
+#[derive(ValueEnum, Subcommand, Clone)]
+pub enum Tables {
+    Allergies,
+    Patients,
+    Organizations,
+}
 
 /// csv_import_intitialization(table:table, location) 
 /// returns: result<>
@@ -32,11 +60,11 @@ pub mod models;
 /// 
 /// at any point it could return a result, or an error
 ///
-pub fn csv_import(table: tables, location: string) -> io::result<()> {
+pub fn csv_import(table: Tables, location: String) -> io::Result<()> {
 
     // getting the file, or die
-    let file = file::open(location)?;
-    let mut csv_file = csv::reader::from_reader(&file);
+    let file = File::open(location)?;
+    let mut csv_file = csv::Reader::from_reader(&file);
    
     {
     // get the headers to print out with the table info.
@@ -48,36 +76,36 @@ pub fn csv_import(table: tables, location: string) -> io::result<()> {
     // this really checks if the inputted table exists
     // this code needs to be updated when a new table is added
     match table {
-        tables::allergies => {
+        Tables::Allergies => {
             // println!("be sure the csv contains the following fields:\r\n{:?}", allergies::table::all_columns());
 
             match import_allergies(&mut csv_file) {
-                ok(()) => println!("import successful"),
-                err(e) => {
+                Ok(()) => println!("import successful"),
+                Err(e) => {
                     println!("error occured during import {}", e);
                     process::exit(1);
                 }
 
             };
         }
-        tables::patients => {
+        Tables::Patients => {
             // println!("be sure the csv contains the following fields:\r\n{:?}", patients::table::all_columns());
 
             match import_patients(&mut csv_file) {
-                ok(()) => println!("import successful"),
-                err(e) => {
+                Ok(()) => println!("import successful"),
+                Err(e) => {
                     println!("error occured during import {}", e);
                     process::exit(1);
                 }
 
             };
         }
-        tables::organizations => {
+        Tables::Organizations => {
             // println!("be sure the csv contains the following fields:\r\n{:?}", patients::table::all_columns());
 
             match import_organizations(&mut csv_file) {
-                ok(()) => println!("import successful"),
-                err(e) => {
+                Ok(()) => println!("import successful"),
+                Err(e) => {
                     println!("error occured during import {}", e);
                     process::exit(1);
                 }
@@ -89,12 +117,12 @@ pub fn csv_import(table: tables, location: string) -> io::result<()> {
         }
     }
 
-    ok(()) 
+    Ok(()) 
 }
 
 fn import_allergies(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<dyn Error>>{
 
-    let db_connection = &mut establish_connection();
+    let db_connection = &mut database::establish_connection();
 
    
     // get data from file
@@ -121,7 +149,7 @@ fn import_allergies(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<dyn E
 
 fn import_patients(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<dyn Error>>{
 
-    let db_connection = &mut establish_connection();
+    let db_connection = &mut database::establish_connection();
 
    
     // get data from file
@@ -148,7 +176,7 @@ fn import_patients(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<dyn Er
 
 fn import_organizations(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<dyn Error>>{
 
-    let db_connection = &mut establish_connection();
+    let db_connection = &mut database::establish_connection();
 
    
     // get data from file
@@ -176,10 +204,11 @@ fn import_organizations(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<d
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::env;
 
     #[test]
     fn csv_import_initialization_doesnt_die() {
-        let location: String = "./csv/patients_cleaned.csv".to_string();
+        let location: String = "../csv/patients_cleaned.csv".to_string();
 
         assert!(csv_import(Tables::Patients, location).is_ok(), "CSV import finished" ); 
 
@@ -214,7 +243,7 @@ mod tests {
             .open(dir.as_path().join("foo.txt"))
             .unwrap();
         
-        f.write_all(data); 
+        f.write_all(data);
 
         f.rewind(); 
 
@@ -291,7 +320,7 @@ mod tests {
             .unwrap();
         
         f.write_all(data); 
-
+        
         f.rewind(); 
 
         let mut rdr = csv::Reader::from_reader(&f);
