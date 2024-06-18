@@ -1,39 +1,33 @@
-extern crate dotenv;
+use database;
 
 use csv::Reader;
-use dotenv::dotenv;
 
-use std::env;
 use std::fs::File;
 use std::io;
-// use std::io::Cursor;
-use std::error::Error;
 use std::io::prelude::*;
+
+use std::error::Error;
 use std::process;
 
 use clap::{Parser, Subcommand, ValueEnum};
 
-use diesel::pg::PgConnection;
-use diesel::prelude::*;
+use diesel::RunQueryDsl;
 
-use crate::models::{ Allergy, NewAllergy, Patient, NewPatient, Organization, NewOrganization };
-use crate::schema::{ allergies, patients, organizations };
-
-pub mod schema;
-pub mod models;
+use database::models::{ NewAllergy, NewPatient, NewOrganization };
+use database::schema::{ allergies, patients, organizations };
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
-struct Cli {
+pub struct Cli {
     // #[arg(short, long)]
     // use a subcommand, that's an enum pointing to the 
     // file type and the file location
     #[command(subcommand)]
-    commands: Commands,
+    pub commands: Commands,
 }
 
 #[derive(Subcommand)]
-enum Commands {
+pub enum Commands {
     #[command(arg_required_else_help = false)]
     Import {
         #[arg(required = true)]
@@ -45,7 +39,7 @@ enum Commands {
 }
 
 #[derive(ValueEnum, Subcommand, Clone)] 
-enum FileTypes {
+pub enum FileTypes {
     Csv,
 }
 
@@ -56,16 +50,9 @@ pub enum Tables {
     Organizations,
 }
 
-pub fn establish_connection() -> PgConnection {
-        dotenv().ok();
-        let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-        PgConnection::establish(&database_url)
-            .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
-}
-
-/// csv_import_intitialization(table:Table, location) 
-/// returns: Result<>
-/// This function 
+/// csv_import_intitialization(table:table, location) 
+/// returns: result<>
+/// this function 
 ///     takes in the location of  csv file for import,
 ///     asks what table the data goes into (csv we are assuming have a specific set of data)
 ///     opens the file
@@ -82,51 +69,51 @@ pub fn csv_import(table: Tables, location: String) -> io::Result<()> {
     {
     // get the headers to print out with the table info.
         let csv_headers = csv_file.headers()?;
-        println!("CSV file has the following fields: ");
+        println!("csv file has the following fields: ");
         println!("{:?}", csv_headers);
     }
 
-    // This really checks if the inputted table exists
-    // This code needs to be updated when a new table is added
+    // this really checks if the inputted table exists
+    // this code needs to be updated when a new table is added
     match table {
         Tables::Allergies => {
-            // println!("Be sure the csv contains the following fields:\r\n{:?}", allergies::table::all_columns());
+            // println!("be sure the csv contains the following fields:\r\n{:?}", allergies::table::all_columns());
 
             match import_allergies(&mut csv_file) {
-                Ok(()) => println!("Import successful"),
+                Ok(()) => println!("import successful"),
                 Err(e) => {
-                    println!("Error occured during import {}", e);
+                    println!("error occured during import {}", e);
                     process::exit(1);
                 }
 
             };
         }
         Tables::Patients => {
-            // println!("Be sure the csv contains the following fields:\r\n{:?}", patients::table::all_columns());
+            // println!("be sure the csv contains the following fields:\r\n{:?}", patients::table::all_columns());
 
             match import_patients(&mut csv_file) {
-                Ok(()) => println!("Import successful"),
+                Ok(()) => println!("import successful"),
                 Err(e) => {
-                    println!("Error occured during import {}", e);
+                    println!("error occured during import {}", e);
                     process::exit(1);
                 }
 
             };
         }
         Tables::Organizations => {
-            // println!("Be sure the csv contains the following fields:\r\n{:?}", patients::table::all_columns());
+            // println!("be sure the csv contains the following fields:\r\n{:?}", patients::table::all_columns());
 
             match import_organizations(&mut csv_file) {
-                Ok(()) => println!("Import successful"),
+                Ok(()) => println!("import successful"),
                 Err(e) => {
-                    println!("Error occured during import {}", e);
+                    println!("error occured during import {}", e);
                     process::exit(1);
                 }
 
             };
         }
         _ => {
-            println!("That table does not exist. Check the name and try again.");
+            println!("that table does not exist. check the name and try again.");
         }
     }
 
@@ -135,7 +122,7 @@ pub fn csv_import(table: Tables, location: String) -> io::Result<()> {
 
 fn import_allergies(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<dyn Error>>{
 
-    let db_connection = &mut establish_connection();
+    let db_connection = &mut database::establish_connection();
 
    
     // get data from file
@@ -162,7 +149,7 @@ fn import_allergies(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<dyn E
 
 fn import_patients(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<dyn Error>>{
 
-    let db_connection = &mut establish_connection();
+    let db_connection = &mut database::establish_connection();
 
    
     // get data from file
@@ -189,7 +176,7 @@ fn import_patients(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<dyn Er
 
 fn import_organizations(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<dyn Error>>{
 
-    let db_connection = &mut establish_connection();
+    let db_connection = &mut database::establish_connection();
 
    
     // get data from file
@@ -213,47 +200,15 @@ fn import_organizations(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<d
     Ok(())
 }
 
-fn main() {
-        dotenv().ok();
-        
-        // We can get our setup from a .env file. Nice for development!
-        // let db_url = env::var("DATABASE_URL")
-        //             .expect("DATABASE_URL must be set.");
-
-        let db_connection: PgConnection = establish_connection();
-
-        // We should have command line tools callable
-        // So we take command line args.
-        // -- -i <file type> <file location>
-        let cli = Cli::parse();
-
-        match cli.commands {
-            Commands::Import { file_type, table, location } => {
-                match file_type {
-                    FileTypes::Csv => {
-                        match  csv_import(table, location) {
-                            Ok(()) => process::exit(0),
-                            Err(e) => process::exit(1),
-                        }
-
-                     //       let file_handle = csv_import(table, location);
-                    }
-                }
-            },
-            Commands::Run => {
-                println!("Run this app.");
-            }
-        }
-
-}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::env;
 
     #[test]
     fn csv_import_initialization_doesnt_die() {
-        let location: String = "./csv/patients_cleaned.csv".to_string();
+        let location: String = "../csv/patients_cleaned.csv".to_string();
 
         assert!(csv_import(Tables::Patients, location).is_ok(), "CSV import finished" ); 
 
@@ -288,7 +243,7 @@ mod tests {
             .open(dir.as_path().join("foo.txt"))
             .unwrap();
         
-        f.write_all(data); 
+        f.write_all(data);
 
         f.rewind(); 
 
@@ -365,7 +320,7 @@ mod tests {
             .unwrap();
         
         f.write_all(data); 
-
+        
         f.rewind(); 
 
         let mut rdr = csv::Reader::from_reader(&f);
