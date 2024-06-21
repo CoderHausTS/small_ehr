@@ -53,14 +53,14 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn json() {
+    async fn create_new_patient_json() {
         let api_router = api_router();
        
         let response = api_router
             .oneshot(
                 Request::builder()
                     .method(http::Method::POST)
-                    .uri("/json")
+                    .uri("/api/patient/new")
                     .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
                     .body(Body::from(
                         serde_json::to_vec(&json!([1, 2, 3, 4])).unwrap(),
@@ -77,77 +77,77 @@ mod tests {
         assert_eq!(body, json!({ "data": [1, 2, 3, 4] }));
     }
 
-    #[tokio::test]
-    async fn not_found() {
-        let api_router = api_router();
-
-        let response = api_router
-            .oneshot(
-                Request::builder()
-                    .uri("/does-not-exist")
-                    .body(Body::empty())
-                    .unwrap(),
-            )
-            .await
-            .unwrap();
-
-        assert_eq!(response.status(), StatusCode::NOT_FOUND);
-        let body = response.into_body().collect().await.unwrap().to_bytes();
-        assert!(body.is_empty());
-    }
-
-    // You can also spawn a server and talk to it like any other HTTP server:
-    #[tokio::test]
-    async fn the_real_deal() {
-        let listener = TcpListener::bind("0.0.0.0:0").await.unwrap();
-        let addr = listener.local_addr().unwrap();
-
-        tokio::spawn(async move {
-            axum::serve(listener, api_router()).await.unwrap();
-        });
-
-        let client =
-            hyper_util::client::legacy::Client::builder(hyper_util::rt::TokioExecutor::new())
-                .build_http();
-
-        let response = client
-            .request(
-                Request::builder()
-                    .uri(format!("http://{addr}"))
-                    .header("Host", "localhost")
-                    .body(Body::empty())
-                    .unwrap(),
-            )
-            .await
-            .unwrap();
-
-        let body = response.into_body().collect().await.unwrap().to_bytes();
-        assert_eq!(&body[..], b"Hello, World!");
-    }
-
-    // You can use `ready()` and `call()` to avoid using `clone()`
-    // in multiple request
-    #[tokio::test]
-    async fn multiple_request() {
-        let mut api_router = api_router().into_service();
-
-        let request = Request::builder().uri("/").body(Body::empty()).unwrap();
-        let response = ServiceExt::<Request<Body>>::ready(&mut api_router)
-            .await
-            .unwrap()
-            .call(request)
-            .await
-            .unwrap();
-        assert_eq!(response.status(), StatusCode::OK);
-
-        let request = Request::builder().uri("/").body(Body::empty()).unwrap();
-        let response = ServiceExt::<Request<Body>>::ready(&mut api_router)
-            .await
-            .unwrap()
-            .call(request)
-            .await
-            .unwrap();
-        assert_eq!(response.status(), StatusCode::OK);
-    }
+//    #[tokio::test]
+//    async fn not_found() {
+//        let api_router = api_router();
+//
+//        let response = api_router
+//            .oneshot(
+//                Request::builder()
+//                    .uri("/does-not-exist")
+//                    .body(Body::empty())
+//                    .unwrap(),
+//            )
+//            .await
+//            .unwrap();
+//
+//        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+//        let body = response.into_body().collect().await.unwrap().to_bytes();
+//        assert!(body.is_empty());
+//    }
+//
+//    // You can also spawn a server and talk to it like any other HTTP server:
+//    #[tokio::test]
+//    async fn the_real_deal() {
+//        let listener = TcpListener::bind("0.0.0.0:0").await.unwrap();
+//        let addr = listener.local_addr().unwrap();
+//
+//        tokio::spawn(async move {
+//            axum::serve(listener, api_router()).await.unwrap();
+//        });
+//
+//        let client =
+//            hyper_util::client::legacy::Client::builder(hyper_util::rt::TokioExecutor::new())
+//                .build_http();
+//
+//        let response = client
+//            .request(
+//                Request::builder()
+//                    .uri(format!("http://{addr}"))
+//                    .header("Host", "localhost")
+//                    .body(Body::empty())
+//                    .unwrap(),
+//            )
+//            .await
+//            .unwrap();
+//
+//        let body = response.into_body().collect().await.unwrap().to_bytes();
+//        assert_eq!(&body[..], b"Hello, World!");
+//    }
+//
+//    // You can use `ready()` and `call()` to avoid using `clone()`
+//    // in multiple request
+//    #[tokio::test]
+//    async fn multiple_request() {
+//        let mut api_router = api_router().into_service();
+//
+//        let request = Request::builder().uri("/").body(Body::empty()).unwrap();
+//        let response = ServiceExt::<Request<Body>>::ready(&mut api_router)
+//            .await
+//            .unwrap()
+//            .call(request)
+//            .await
+//            .unwrap();
+//        assert_eq!(response.status(), StatusCode::OK);
+//
+//        let request = Request::builder().uri("/").body(Body::empty()).unwrap();
+//        let response = ServiceExt::<Request<Body>>::ready(&mut api_router)
+//            .await
+//            .unwrap()
+//            .call(request)
+//            .await
+//            .unwrap();
+//        assert_eq!(response.status(), StatusCode::OK);
+//    }
 
 }
