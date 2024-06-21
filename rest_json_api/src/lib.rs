@@ -10,14 +10,31 @@
 
 use axum::{
         Router,
-        routing::get,
+        routing::{ get, post },
         Json,
 };
+
+use database::models::NewPatient; // , Patient };
+
+async fn create_new_patient(Json(newpatient): Json<NewPatient>) { // -> Json<Patient> {
+    let db_connection = &mut database::establish_connection();
+    database::create_patient(db_connection, &newpatient); 
+
+    // if the create was good, return 200,
+    // if not, return error
+}
+
+pub fn patient_router() -> Router {
+    Router::new()
+        .route("/api/patient", post(create_new_patient))
+    
+}
 
 fn api_router() -> Router {
     // testing
     Router::new()
         .route("/api/healthcheck", get(|| async { "Hello, World!" }))
+        .merge(patient_router())
 }
 
 #[cfg(test)]
@@ -29,9 +46,10 @@ mod tests {
         http::{self, Request, StatusCode},
     };
     use http_body_util::BodyExt; // for `collect`
-    use serde_json::{json, Value};
-    use tokio::net::TcpListener;
+    // use serde_json::{json, Value};
+    // use tokio::net::TcpListener;
     use tower::{Service, ServiceExt}; // for `call`, `oneshot`, and `ready`
+    use database::models::Patient;
 
     // test the health check
     #[tokio::test]
@@ -54,16 +72,26 @@ mod tests {
 
     #[tokio::test]
     async fn create_new_patient_json() {
+
+        // let db_connection = &mut database::establish_connection();
         let api_router = api_router();
-       
+
+        let record = r#"
+            { 
+                "birthdate": "2021-02-17", "ssn": "999-65-4444", "first": "Jason", "last": "APIPAT"
+            }"#;
+
+
+        let new_patient: NewPatient = serde_json::from_str(record).unwrap();
+  
         let response = api_router
             .oneshot(
                 Request::builder()
                     .method(http::Method::POST)
-                    .uri("/api/patient/new")
+                    .uri("/api/patient")
                     .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
                     .body(Body::from(
-                        serde_json::to_vec(&json!([1, 2, 3, 4])).unwrap(),
+                        record,
                     ))
                     .unwrap(),
             )
@@ -71,10 +99,6 @@ mod tests {
             .unwrap();
 
         assert_eq!(response.status(), StatusCode::OK);
-
-        let body = response.into_body().collect().await.unwrap().to_bytes();
-        let body: Value = serde_json::from_slice(&body).unwrap();
-        assert_eq!(body, json!({ "data": [1, 2, 3, 4] }));
     }
 
 //    #[tokio::test]

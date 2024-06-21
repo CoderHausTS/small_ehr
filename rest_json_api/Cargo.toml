@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+database = {path = "../database" }
+
 serde = { version = "1.0.203", features = ["derive"] }
 axum = "0.7.5"
 tower = { version = "0.4.13", features = ["full"] }
