@@ -1,32 +1,58 @@
-// This is cool. We can have each router in its own file in this crate.
-// Then we just use each mod, and it handles the requests for a certain type of endpoint.
-//
-// fn api_router() -> Router {
-//     // This is the order that the modules were authored in.
-//     users::router()
-//         .merge(profiles::router())
-//         .merge(articles::router())
-// }
-
 use axum::{
-        Router,
-        routing::{ get, post },
-        Json,
+        http::StatusCode, 
+        routing::{ get, post }, 
+        Json, 
+        Router, 
+        debug_handler,
+        extract::Path,
+        response::IntoResponse,
 };
 
-use database::models::NewPatient; // , Patient };
+use database::models::{ NewPatient , Patient };
+use uuid::{ uuid, Uuid };
 
-async fn create_new_patient(Json(newpatient): Json<NewPatient>) { // -> Json<Patient> {
+use serde_json::json;
+
+use std::net::SocketAddr;
+
+// async fn create_new_patient(Json(newpatient): Json<NewPatient>) { 
+async fn create_new_patient(Json(newpatient): Json<NewPatient>) -> impl IntoResponse { 
     let db_connection = &mut database::establish_connection();
-    database::create_patient(db_connection, &newpatient); 
 
-    // if the create was good, return 200,
-    // if not, return error
+    match database::create_patient(db_connection, &newpatient) {
+        Ok(patient_result) => (StatusCode::OK, Json(patient_result)),
+        Err(_err) => (StatusCode::UNPROCESSABLE_ENTITY, Json(Patient::default())),
+     }
+
+}
+
+// We get the UUID from the incoming path,
+// and send back a response that is StatusCode, T
+// In our case T is the patient type
+// To do this, we have to send a result from our database code.
+// We also had to add a default trait to our Patient model, to return nulls
+// The response here isn't strictly correct, as we would send a 200 for an error
+// THought right now, that error would most likely be the case where we didn't find any
+// data. 
+// So, we'll leave a 200 for an error, and update this later to make the error handling 
+// mroe specific. 
+// In the case where a record isn't found, we also send an ID of all 0's
+async fn find_patient_by_uuid(Path(patient_uuid): Path<Uuid>) -> impl IntoResponse { 
+    let db_connection = &mut database::establish_connection();
+
+   match database::get_patient_by_uuid(db_connection, &patient_uuid) {
+        // need to add error response, or empty response, here
+        Ok(patient_result) => (StatusCode::OK, Json(patient_result)),
+        Err(_err) => (StatusCode::OK, Json(Patient::default())),
+   }
+
+   // Ok(Json(patient_result))
 }
 
 pub fn patient_router() -> Router {
     Router::new()
         .route("/api/patient", post(create_new_patient))
+        .route("/api/patient/:id", get( find_patient_by_uuid ))
     
 }
 
@@ -35,6 +61,16 @@ fn api_router() -> Router {
     Router::new()
         .route("/api/healthcheck", get(|| async { "Hello, World!" }))
         .merge(patient_router())
+}
+
+pub async fn start_rest_api () {
+
+    // run it with hyper
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    // tracing::debug!("listening on {addr}");
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+	let router = api_router();
+    axum::serve(listener, router).await.unwrap(); 
 }
 
 #[cfg(test)]
@@ -100,6 +136,87 @@ mod tests {
 
         assert_eq!(response.status(), StatusCode::OK);
     }
+
+    #[tokio::test]
+    async fn fail_to_create_new_patient_json() {
+
+        // let db_connection = &mut database::establish_connection();
+        let api_router = api_router();
+
+        let record = r#"
+            { 
+                "birthdate": "", "ssn": "", "first": "", "last": ""
+            }"#;
+
+
+        // let new_patient: NewPatient = serde_json::from_str(record).unwrap();
+  
+        let response = api_router
+            .oneshot(
+                Request::builder()
+                    .method(http::Method::POST)
+                    .uri("/api/patient")
+                    .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
+                    .body(Body::from(
+                        record,
+                    ))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+    }
+
+
+    #[tokio::test]
+    async fn successfully_retrieve_patient_by_uuid() {
+		// api_router is our router
+        let api_router = api_router();
+
+        // `Router` implements `tower::Service<Request<Body>>` so we can
+        // call it like any tower service, no need to run an HTTP server.
+        let response = api_router
+            .oneshot(Request::builder().uri("/api/patient/3b75f74f-1101-44da-be73-aa091eb00873")
+                     .body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+
+        // let body = response.into_body().collect().await.unwrap().to_bytes();
+        // assert_eq!(&body["id"],"3b75f74f-1101-44da-be73-aa091eb00873" );
+    }
+
+     #[tokio::test]
+    async fn fail_to_retrieve_patient_by_uuid() {
+		// api_router is our router
+        let api_router = api_router();
+
+        // `Router` implements `tower::Service<Request<Body>>` so we can
+        // call it like any tower service, no need to run an HTTP server.
+        let response = api_router
+            .oneshot(Request::builder().uri("/api/patient/3b75f74f-1101-44da-be73-aa091eb00872")
+                     .body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+
+        // let body = response.into_body().collect().await.unwrap().to_bytes();
+        // assert_eq!(&body["id"],"3b75f74f-1101-44da-be73-aa091eb00873" );
+    }
+
+   // #[tokio::test]
+   //  async fn successfully_retrieve_patient_by_uuid() {
+   //     let api_router = api_router();
+
+   //     let patient_uuid: Uuid = uuid!("3b75f74f-1101-44da-be73-aa091eb00873");
+        
+
+        
+
+
 
 //    #[tokio::test]
 //    async fn not_found() {

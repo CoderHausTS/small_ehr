@@ -1,7 +1,7 @@
 use diesel::prelude::*; // , sql_types::{BigInt, Float}};
 use uuid::Uuid;
 use chrono::prelude::*;
-use serde::Deserialize;
+use serde::{ Deserialize, Serialize };
 use bigdecimal::BigDecimal;
 
 #[derive(Queryable, Selectable, Deserialize, Debug)]
@@ -41,7 +41,7 @@ pub struct NewAllergy {
     pub snomed: Option<Vec<Option<String>>>    // Vec<String>,
 }
 
-#[derive(Queryable, Selectable, Deserialize, Debug)]
+#[derive(Queryable, Selectable, Deserialize, Serialize, Default, Debug)]
 #[diesel(table_name = crate::schema::patients)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Patient {
@@ -72,7 +72,7 @@ pub struct Patient {
     pub healthcare_coverage: Option<String>,
 }
 
-#[derive(Insertable, Selectable, Deserialize, Debug)]
+#[derive(Insertable, Selectable, Deserialize, Serialize, Debug)]
 #[diesel(table_name = crate::schema::patients)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct NewPatient {

@@ -7,10 +7,11 @@ edition = "2021"
 database = {path = "../database" }
 
 serde = { version = "1.0.203", features = ["derive"] }
-axum = "0.7.5"
+axum = { version = "0.7.5", features = ["macros"] }
 tower = { version = "0.4.13", features = ["full"] }
 serde_json = "1.0.117"
 tokio = { version = "1.38.0", features = ["full"] }
 http-body-util = "0.1.2"
 mime = "0.3.17"
 hyper-util = { version = "0.1.5", features = ["client", "client-legacy"] }
+uuid = "1.8.0"
