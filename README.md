@@ -109,16 +109,18 @@ To get a local copy up and running follow these simple example steps. (TBD)
    ```sh
    docker compose up
    ```
-3.1 Run diesel setup and migrations
-   ```sh
-	diesel setup
-	diesel migration run
+4. Run diesel setup and migrations
+    ```sh
+    diesel setup
     ```
-4. Run environment script (maybe)
-   ```sh
-   . ./somescript.sh
-   ```
-5. Build and run
+    ```sh
+    diesel migration run
+    ```
+5. Run environment script (maybe)
+    ```sh
+    . ./somescript.sh
+    ```
+6. Build and run
    ```sh
    cargo run -- run
    ```
@@ -126,26 +128,23 @@ To get a local copy up and running follow these simple example steps. (TBD)
 ### Post install
 1. Import data
    Use synthetic data if you are testing. A good resource is [Mitre Synthea](https://synthea.mitre.org/downloads)
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 2. Use the data cleaning scripts in file_utils to clean and prep your data for the schema.
 3. Either import via your fav CLI tool, or use the built in import commands such as
    ```sh
 	cargo run -- import csv patients "file_location"
    ```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-This space will show useful examples of how this project can be used. Additional screenshots, code examples and demos will be added.
-
 To run the server side, simply build and feed run to the executable, or build the project and do the same
-	```sh
-	cargo run -- run
-	```
+    ```sh
+    cargo run -- run
+    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- ROADMAP -->
