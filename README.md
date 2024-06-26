@@ -84,8 +84,9 @@
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To get a local copy up and running follow these simple example steps. (TBD)
+To get a local copy up and running follow one of these two sets of example steps.
 
+### Local Install
 ### Prerequisites
 
 * rust 
@@ -124,6 +125,21 @@ To get a local copy up and running follow these simple example steps. (TBD)
    ```sh
    cargo run -- run
    ```
+
+### Using docker compose
+### Prerequisites
+1. Install docker.
+
+### Installation
+
+1. Clone the repo
+   ```sh
+   git clone https://github.com/CoderHausTS/smallEHR.git
+   ```
+2. Start up the docker containers
+   ```sh
+   docker compose up
+   ```   
 
 ### Post install
 1. Import data
