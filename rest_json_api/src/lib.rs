@@ -6,12 +6,14 @@ use axum::{
 use std::net::SocketAddr;
 
 mod patients;
+mod organizations;
 
 fn api_router() -> Router {
     // testing
     Router::new()
         .route("/api/healthcheck", get(|| async { "Hello, World!" }))
         .merge(patients::patient_router())
+        .merge(organizations::organization_router())
 }
 
 pub async fn start_rest_api () {

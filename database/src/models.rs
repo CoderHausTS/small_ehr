@@ -102,7 +102,7 @@ pub struct NewPatient {
     pub healthcare_coverage: Option<String>,
 }
 
-#[derive(Queryable, Selectable, Deserialize, Debug)]
+#[derive(Queryable, Selectable, Deserialize, Serialize, Default, Debug)]
 #[diesel(table_name = crate::schema::organizations)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Organization {
@@ -119,7 +119,7 @@ pub struct Organization {
     pub utilization: Option<i32>,
 }
 
-#[derive(Insertable, Selectable, Deserialize, Debug)]
+#[derive(Insertable, Selectable, Deserialize, Serialize, Debug)]
 #[diesel(table_name = crate::schema::organizations)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct NewOrganization {
