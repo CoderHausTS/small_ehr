@@ -7,6 +7,7 @@ use std::net::SocketAddr;
 
 mod patients;
 mod organizations;
+mod payers;
 
 fn api_router() -> Router {
     // testing
@@ -14,6 +15,7 @@ fn api_router() -> Router {
         .route("/api/healthcheck", get(|| async { "Hello, World!" }))
         .merge(patients::patient_router())
         .merge(organizations::organization_router())
+        .merge(payers::payer_router())
 }
 
 pub async fn start_rest_api () {

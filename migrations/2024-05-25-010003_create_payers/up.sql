@@ -1,7 +1,7 @@
 -- Your SQL goes here
 CREATE TABLE payers (
 	
-	id uuid NOT NULL PRIMARY KEY,
+	id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
 	NAME text NOT NULL,
 	ADDRESS text,
 	CITY text,

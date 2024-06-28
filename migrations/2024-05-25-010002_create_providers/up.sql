@@ -1,7 +1,7 @@
 -- Your SQL goes here
 CREATE TABLE providers (
 	
-	id uuid NOT NULL PRIMARY KEY,
+	id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
 	ORGANIZATION_ID uuid NOT NULL REFERENCES organizations(id),
 	NAME TEXT,
 	GENDER TEXT,

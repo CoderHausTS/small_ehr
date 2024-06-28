@@ -12,9 +12,10 @@ use uuid::Uuid;
 pub mod schema;
 pub mod models;
 
-use models::{ Patient, NewPatient, Organization, NewOrganization };
+use models::{ Patient, NewPatient, Organization, NewOrganization, Payer, NewPayer };
 use schema::patients::dsl::patients;
 use schema::organizations::dsl::organizations;
+use schema::payers::dsl::payers;
 
 pub fn establish_connection() -> PgConnection {
         dotenv().ok();
@@ -54,6 +55,23 @@ pub fn create_organization(conn: &mut PgConnection, new_organization: &NewOrgani
 pub fn get_organization_by_uuid(conn: &mut PgConnection, organization_uuid: &Uuid) -> Result<Organization, Error> {
    organizations 
         .find(organization_uuid)
+        .first(conn)
+}
+
+pub fn create_payer(conn: &mut PgConnection, new_payer: &NewPayer) ->  Result<Payer, Error> {  // Patient {
+    use crate::schema::payers;
+
+    diesel::insert_into(payers::table)
+        .values(new_payer)
+        .returning(Payer::as_returning())
+        .get_result(conn)
+        //.expect("Error saving new post")
+}
+
+// We are sending back a result, so in our code we can address this with and Ok, Err match.
+pub fn get_payer_by_uuid(conn: &mut PgConnection, payer_uuid: &Uuid) -> Result<Payer, Error> {
+    payers
+        .find(payer_uuid)
         .first(conn)
 }
 
@@ -172,4 +190,59 @@ mod tests {
 
         assert!(retrieved_organization.is_err());
     }
+
+    #[test]
+    fn successfully_creates_new_payer_record() {
+       let record = r#"
+       { 
+            "name": "Jane Smith"
+       }"#;
+
+        let db_connection = &mut establish_connection();
+
+        let new_payer: NewPayer = serde_json::from_str(record).unwrap();
+        
+        let created_payer = create_payer(db_connection, &new_payer);
+        
+        assert!(created_payer.is_ok());
+    }
+
+    #[test]
+    fn successfully_retrieves_payer_by_uuid() {
+        let db_connection = &mut establish_connection();
+
+        // bad juju. Need to insert a patient record, then get the UUID to look for.
+        let payer_uuid: Uuid = uuid!("3b75f74f-1101-44da-be73-aa091eb00873");
+        let name = "Jimmy Jones"; 
+        let query = format!("INSERT INTO payers (id, name) VALUES (\'{}\', \'{}\')", payer_uuid, name);
+        diesel::sql_query(query)
+                        .execute(db_connection)
+                                .unwrap();
+
+
+        let retrieved_payer = get_payer_by_uuid(db_connection, &payer_uuid);
+
+        // clean up
+        let query = format!("DELETE FROM payers WHERE id = \'{}\'", payer_uuid);
+        diesel::sql_query(query)
+            .execute(db_connection)
+            .unwrap();
+
+        assert!(retrieved_payer.is_ok())
+
+        // assert_eq!(patient_uuid, retrieved_patient.id);
+    }
+
+    #[test]
+    fn fail_to_retrieve_payer_by_uuid() {
+        let db_connection = &mut establish_connection();
+
+        // bad juju. Need to insert a patient record, then get the UUID to look for.
+        let payer_uuid: Uuid = uuid!("2b75f74f-1101-44da-be73-aa091eb00873");
+
+        let retrieved_payer = get_payer_by_uuid(db_connection, &payer_uuid);
+
+        assert!(retrieved_payer.is_err());
+    }
+
 }

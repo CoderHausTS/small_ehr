@@ -1,4 +1,4 @@
-use diesel::prelude::*; // , sql_types::{BigInt, Float}};
+use diesel::{prelude::*, sql_types::TinyInt, sql_types::BigInt}; // , sql_types::{BigInt, Float}};
 use uuid::Uuid;
 use chrono::prelude::*;
 use serde::{ Deserialize, Serialize };
@@ -131,6 +131,60 @@ pub struct NewOrganization {
     pub lat: Option<String>,
     pub lon: Option<String>,
     pub phone: Option<String>,
-    pub revenue : Option<BigDecimal>,
+    pub revenue: Option<BigDecimal>,
     pub utilization: Option<i32>,
 }  
+
+#[derive(Queryable, Selectable, Deserialize, Serialize, Default, Debug)]
+#[diesel(table_name = crate::schema::payers)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct Payer {
+    pub id: Uuid,
+    pub name: String,
+    pub address: Option<String>,
+    pub city: Option<String>,
+    pub state_headquartered: Option<String>,
+    pub zip: Option<String>,
+    pub phone: Option<String>,
+    pub amount_covered: Option<BigDecimal>,
+    pub amount_uncovered: Option<BigDecimal>,
+    pub revenue: Option<BigDecimal>,
+    pub covered_encounters: Option<i64>,
+    pub uncovered_encounters: Option<i64>,
+    pub covered_medications: Option<i64>,
+    pub uncovered_medications: Option<i64>,
+    pub covered_procedures: Option<i64>,
+    pub uncovered_procedures: Option<i64>,
+    pub covered_immunizations: Option<i64>,
+    pub uncovered_immunizations: Option<i64>,
+    pub unique_customers: Option<i64>,
+    pub qols_avg: Option<BigDecimal>,
+    pub member_months: Option<i64>,
+}
+
+#[derive(Insertable, Selectable, Deserialize, Serialize, Debug)]
+#[diesel(table_name = crate::schema::payers)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct NewPayer {
+    pub name: String,
+    pub address: Option<String>,
+    pub city: Option<String>,
+    pub state_headquartered: Option<String>,
+    pub zip: Option<String>,
+    pub phone: Option<String>,
+    pub amount_covered: Option<BigDecimal>,
+    pub amount_uncovered: Option<BigDecimal>,
+    pub revenue: Option<BigDecimal>,
+    pub covered_encounters: Option<i64>,
+    pub uncovered_encounters: Option<i64>,
+    pub covered_medications: Option<i64>,
+    pub uncovered_medications: Option<i64>,
+    pub covered_procedures: Option<i64>,
+    pub uncovered_procedures: Option<i64>,
+    pub covered_immunizations: Option<i64>,
+    pub uncovered_immunizations: Option<i64>,
+    pub unique_customers: Option<i64>,
+    pub qols_avg: Option<BigDecimal>,
+    pub member_months: Option<i64>,
+}
+
