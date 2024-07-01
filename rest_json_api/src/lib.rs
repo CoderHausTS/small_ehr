@@ -6,21 +6,26 @@ use axum::{
 use std::net::SocketAddr;
 
 mod patients;
+mod organizations;
+mod payers;
 
 fn api_router() -> Router {
     // testing
     Router::new()
         .route("/api/healthcheck", get(|| async { "Hello, World!" }))
         .merge(patients::patient_router())
+        .merge(organizations::organization_router())
+        .merge(payers::payer_router())
 }
 
 pub async fn start_rest_api () {
 
     // run it with hyper
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
 	let router = api_router();
-
+    println!("-----------------------------------------------");
+    println!("Listening on {:?}", listener.local_addr()); 
     axum::serve(listener, router).await.unwrap(); 
 }
 

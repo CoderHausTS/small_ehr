@@ -1,7 +1,7 @@
 -- Your SQL goes here
 CREATE TABLE organizations (
 	
-	id uuid PRIMARY KEY NOT NULL ,
+	id uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL ,
 	NAME text NOT NULL,
 	ADDRESS text,
 	CITY text,

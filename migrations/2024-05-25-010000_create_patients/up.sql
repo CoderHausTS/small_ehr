@@ -1,6 +1,6 @@
 -- Your SQL goes here
 CREATE TABLE patients (
-	id uuid PRIMARY KEY NOT NULL,
+	id uuid default gen_random_uuid() PRIMARY KEY NOT NULL,
 	BIRTHDATE date NOT NULL,
 	DEATHDATE date,
 	SSN text,

@@ -12,9 +12,27 @@ services:
         retries: 10
       ports:
         - 5432:5432
+      networks:
+        - backend
 
     adminer:
       image: adminer
       restart: always
       ports:
         - 8080:8080
+      networks:
+        - backend
+
+          #    api:
+          #      build: ./Dockerfile.testing
+          #      depends_on:
+          #        db:
+          #          condition: service_healthy
+          #      ports:
+          #        - 3000:3000
+          #      networks:
+          #        - backend
+
+networks:
+  backend:
+    driver: bridge

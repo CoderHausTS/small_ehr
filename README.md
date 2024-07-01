@@ -76,6 +76,7 @@
 
 * Rust
 * Diesel
+* Axum
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -83,13 +84,14 @@
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To get a local copy up and running follow these simple example steps. (TBD)
+To get a local copy up and running follow one of these two sets of example steps.
 
+### Local Install
 ### Prerequisites
 
 * rust 
   * Install rust following the [official documentation](https://www.rust-lang.org/learn/get-started)
-* postgreSQL client
+* postgreSQL client an library (libpq)
 * mysqlclient (for Diesel CLI)
 * sqlite3 (for Diesel CLI)
 * diesel_cli crate - follow the docs at [https://diesel.rs/guides/getting-started](https://diesel.rs/guides/getting-started)
@@ -100,38 +102,65 @@ To get a local copy up and running follow these simple example steps. (TBD)
    ```sh
    git clone https://github.com/CoderHausTS/smallEHR.git
    ```
-2. Install crates
+2. Install crates and get the project ready
    ```sh
-   cargo install blah
+   cargo build 
    ```
 3. Spin up PostgreSQL docker container
    ```sh
    docker compose up
    ```
-4. Run environment script (maybe)
+4. Run diesel setup and migrations
+    ```sh
+    diesel setup
+    ```
+    ```sh
+    diesel migration run
+    ```
+5. Run environment script (maybe)
+    ```sh
+    . ./somescript.sh
+    ```
+6. Build and run
    ```sh
-   . ./somescript.sh
+   cargo run -- run
    ```
-5. Build and run
+
+### Using docker compose
+### Prerequisites
+1. Install docker.
+
+### Installation
+
+1. Clone the repo
    ```sh
-   cargo run blah
+   git clone https://github.com/CoderHausTS/smallEHR.git
    ```
+2. Start up the docker containers
+   ```sh
+   docker compose up
+   ```   
 
 ### Post install
 1. Import data
    Use synthetic data if you are testing. A good resource is [Mitre Synthea](https://synthea.mitre.org/downloads)
+2. Use the data cleaning scripts in file_utils to clean and prep your data for the schema.
+3. Either import via your fav CLI tool, or use the built in import commands such as
+   ```sh
+	cargo run -- import csv patients "file_location"
+   ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-This space will show useful examples of how this project can be used. Additional screenshots, code examples and demos will be added.
-
+To run the server side, simply build and feed run to the executable, or build the project and do the same
+    ```sh
+    cargo run -- run
+    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- ROADMAP -->
