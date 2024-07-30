@@ -188,3 +188,37 @@ pub struct NewPayer {
     pub member_months: Option<i64>,
 }
 
+#[derive(Queryable, Selectable, Deserialize, Serialize, Default, Debug)]
+#[diesel(table_name = crate::schema::providers)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct Provider {
+    pub id: Uuid,
+    pub organization_id: Uuid,
+    pub name: Option<String>,
+    pub gender: Option<String>,
+    pub speciality: Option<String>,
+    pub address: Option<String>,
+    pub city: Option<String>,
+    pub state: Option<String>,
+    pub zip: Option<String>,
+    pub lat: Option<String>,
+    pub lon: Option<String>,
+    pub utilization: Option<i32>,
+}
+
+#[derive(Insertable, Selectable, Deserialize, Serialize, Debug)]
+#[diesel(table_name = crate::schema::providers)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct NewProvider {
+    pub organization_id: Uuid,
+    pub name: Option<String>,
+    pub gender: Option<String>,
+    pub speciality: Option<String>,
+    pub address: Option<String>,
+    pub city: Option<String>,
+    pub state: Option<String>,
+    pub zip: Option<String>,
+    pub lat: Option<String>,
+    pub lon: Option<String>,
+    pub utilization: Option<i32>,
+}
