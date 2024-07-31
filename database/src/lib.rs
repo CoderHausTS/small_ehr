@@ -12,10 +12,12 @@ use uuid::Uuid;
 pub mod schema;
 pub mod models;
 
-use models::{ Patient, NewPatient, Organization, NewOrganization, Payer, NewPayer };
+use models::{ Patient, NewPatient, Organization, NewOrganization, Payer, NewPayer,
+               Provider, NewProvider};
 use schema::patients::dsl::patients;
 use schema::organizations::dsl::organizations;
 use schema::payers::dsl::payers;
+use schema::providers::dsl::providers;
 
 pub fn establish_connection() -> PgConnection {
         dotenv().ok();
@@ -75,6 +77,23 @@ pub fn get_payer_by_uuid(conn: &mut PgConnection, payer_uuid: &Uuid) -> Result<P
         .first(conn)
 }
 
+pub fn create_provider(conn: &mut PgConnection, new_provider: &NewProvider) ->  Result<Provider, Error> {  // Patient {
+    use crate::schema::providers;
+
+    diesel::insert_into(providers::table)
+        .values(new_provider)
+        .returning(Provider::as_returning())
+        .get_result(conn)
+        //.expect("Error saving new post")
+}
+
+// We are sending back a result, so in our code we can address this with and Ok, Err match.
+pub fn get_provider_by_uuid(conn: &mut PgConnection, provider_uuid: &Uuid) -> Result<Provider, Error> {
+   providers 
+        .find(provider_uuid)
+        .first(conn)
+}
+
 #[cfg(test)]
 
 mod tests {
@@ -94,12 +113,8 @@ mod tests {
         let new_patient: NewPatient = serde_json::from_str(record).unwrap();
         
         let created_patient = create_patient(db_connection, &new_patient);
-        
-        assert!(created_patient.is_ok());
-        // let new_pt_bday = new_patient.birthdate;
-        // let created_pt_bday = created_patient.birthdate;
 
-        // assert_eq!(new_pt_bday, created_pt_bday);
+        assert!(created_patient.is_ok());
     }
 
     #[test]
@@ -136,7 +151,8 @@ mod tests {
 
         assert!(retrieved_patient.is_err());
     }
-
+    
+    // -----------------------organization -----------
     #[test]
     fn successfully_creates_new_organization_record() {
        let record = r#"
@@ -191,6 +207,7 @@ mod tests {
         assert!(retrieved_organization.is_err());
     }
 
+    // -------------------------------payer --------------------
     #[test]
     fn successfully_creates_new_payer_record() {
        let record = r#"
@@ -243,6 +260,105 @@ mod tests {
         let retrieved_payer = get_payer_by_uuid(db_connection, &payer_uuid);
 
         assert!(retrieved_payer.is_err());
+    }
+
+
+    // ---------------------Provider------------------------------
+    #[test]
+    fn successfully_creates_new_provider_record() {
+       let db_connection = &mut establish_connection();
+
+       // need to create an org ID first
+       // bad juju. Need to insert a patient record, then get the UUID to look for.
+       let org_uuid: Uuid = uuid!("3b75f74f-1101-44da-be73-aa091eb00879");
+       let name = "Ruths Chris"; 
+       let query = format!("INSERT INTO organizations (id, name) VALUES (\'{}\', \'{}\')", org_uuid, name);
+       diesel::sql_query(query)
+                       .execute(db_connection)
+                               .unwrap();
+
+       let record = r#"
+       { 
+            "organization_id": "3b75f74f-1101-44da-be73-aa091eb00879" , "name": "Provider, Test", 
+            "gender": "Female", 
+            "specialty": "Hem Onc", 
+            "address": "1313 Mockingbird Lane", 
+            "city": "San Bernadino", 
+            "state": "Illinois"
+       }"#;
+
+//        let db_connection = &mut establish_connection();
+
+        //let new_provider: NewProvider = serde_json::from_str(record).unwrap();
+        
+        let new_provider: NewProvider = serde_json::from_str(record).unwrap();
+        
+        let created_provider = create_provider(db_connection, &new_provider);
+        
+        let created_provider_id = created_provider.as_ref().unwrap().id;
+
+        let query = format!("DELETE FROM providers WHERE id = \'{}\'", created_provider_id);
+        diesel::sql_query(query)
+            .execute(db_connection)
+            .unwrap();
+ 
+        let query = format!("DELETE FROM organizations WHERE id = \'{}\'", org_uuid);
+        diesel::sql_query(query)
+            .execute(db_connection)
+            .unwrap();
+       
+        assert!(created_provider.is_ok());
+    }
+
+    #[test]
+    fn successfully_retrieves_provider_by_uuid() {
+       let db_connection = &mut establish_connection();
+
+       // need to create an org ID first
+       // bad juju. Need to insert a patient record, then get the UUID to look for.
+       let org_uuid: Uuid = uuid!("3b75f74f-1101-44da-be73-aa091eb00878");
+       let name = "Ruths Chris"; 
+       let query = format!("INSERT INTO organizations (id, name) VALUES (\'{}\', \'{}\')", org_uuid, name);
+       diesel::sql_query(query)
+                       .execute(db_connection)
+                               .unwrap();
+
+
+        let provider_uuid: Uuid = uuid!("3b75f74f-1101-44da-be73-aa091eb00873");
+        let name = "Provider, Test"; 
+        let query = format!("INSERT INTO providers (id, name, organization_id) VALUES (\'{}\', \'{}\', \'{}\')", provider_uuid, name, org_uuid);
+ 
+        diesel::sql_query(query)
+                        .execute(db_connection)
+                                .unwrap();
+
+        let retrieved_provider = get_provider_by_uuid(db_connection, &provider_uuid);
+
+        let query = format!("DELETE FROM providers WHERE id = \'{}\'", provider_uuid);
+        diesel::sql_query(query)
+            .execute(db_connection)
+            .unwrap();
+
+        let query = format!("DELETE FROM organizations  WHERE id = \'{}\'", org_uuid);
+        diesel::sql_query(query)
+            .execute(db_connection)
+            .unwrap();
+
+
+        assert!(retrieved_provider.is_ok())
+
+    }
+
+    #[test]
+    fn fail_to_retrieve_provider_by_uuid() {
+        let db_connection = &mut establish_connection();
+
+        // bad juju. Need to insert a patient record, then get the UUID to look for.
+        let provider_uuid: Uuid = uuid!("2b75f74f-1101-44da-be73-aa091eb00873");
+
+        let retrieved_provider = get_provider_by_uuid(db_connection, &provider_uuid);
+
+        assert!(retrieved_provider.is_err());
     }
 
 }

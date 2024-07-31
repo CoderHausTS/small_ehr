@@ -318,7 +318,7 @@ diesel::table! {
         zip -> Nullable<Text>,
         lat -> Nullable<Text>,
         lon -> Nullable<Text>,
-        utilization -> Nullable<Int2>,
+        utilization -> Nullable<Integer>,
     }
 }
 
