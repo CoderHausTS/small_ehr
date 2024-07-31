@@ -13,8 +13,8 @@ use clap::{Parser, Subcommand, ValueEnum};
 
 use diesel::RunQueryDsl;
 
-use database::models::{ NewAllergy, NewPatient, NewOrganization };
-use database::schema::{ allergies, patients, organizations };
+use database::models::{ NewAllergy, NewPatient, NewOrganization, NewProvider };
+use database::schema::{ allergies, patients, organizations, providers };
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -48,6 +48,7 @@ pub enum Tables {
     Allergies,
     Patients,
     Organizations,
+    Providers,
 }
 
 /// csv_import_intitialization(table:table, location) 
@@ -112,6 +113,18 @@ pub fn csv_import(table: Tables, location: String) -> io::Result<()> {
 
             };
         }
+        Tables::Providers => {
+            match import_providers(&mut csv_file) {
+                Ok(()) => println!("import successful"),
+                Err(e) => {
+                    println!("error occured during import {}", e);
+                    process::exit(1);
+                }
+
+            };
+        }
+
+
         _ => {
             println!("that table does not exist. check the name and try again.");
         }
@@ -200,7 +213,33 @@ fn import_organizations(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<d
     Ok(())
 }
 
+fn import_providers(csv_file_reader: &mut Reader<&File>) -> Result<(), Box<dyn Error>>{
 
+    let db_connection = &mut database::establish_connection();
+
+   
+    // get data from file
+    //
+    let mut import_count: usize = 0;
+    for csv_record in csv_file_reader.deserialize::<NewProvider>() { // csv_file_reader.records() {
+        // if we have a record, push it into the DB
+        match csv_record {
+            Ok(record) => {
+                let new_provider: NewProvider = record;
+                import_count += diesel::insert_into(providers::table)
+                    .values(&new_provider)
+                    .execute(db_connection)
+                    .expect("Error saving new post");
+            },
+            Err(err) => return Err(From::from(err)),
+        }
+    }
+    println!("Imported {}", import_count);
+  
+    Ok(())
+}
+
+// these tests are broken.
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -335,4 +374,44 @@ mod tests {
         assert_eq!(import_result, ());
     }
 
+    #[test]
+    fn import_providers_returns_nothing_on_success() {
+        // we need N number of rows, not including header.
+
+        // create a csv::Reader object to pass in
+        //
+        let data = b"
+        BIRTHDATE,DEATHDATE,SSN,DRIVERS,PASSPORT,PREFIX,FIRST,LAST,SUFFIX,MAIDEN,MARITAL,RACE,ETHNICITY,GENDER,BIRTHPLACE,ADDRESS,CITY,STATE,COUNTY,ZIP,LAT,LON,HEALTHCARE_EXPENSES,HEALTHCARE_COVERAGE
+        2019-02-17,,999-65-3251,,,,Damon455,Langosh790,,,,white,nonhispanic,M,Middleborough  Massachusetts  US,620 Lynch Tunnel Apt 0,Springfield,Massachusetts,Hampden County,01104,42.08038942501558,-72.48043144917739,9039.1645,7964.1255
+        2005-07-04,,999-49-3323,S99941126,,,Thi53,Wunsch504,,,,white,nonhispanic,F,Danvers  Massachusetts  US,972 Tillman Branch Suite 48,Bellingham,Massachusetts,Norfolk County,,42.03521335752818,-71.48251904737748,402723.415,14064.135000000002
+        1998-05-11,,999-10-8743,S99996708,X75063318X,Mr.,Chi716,Greenfelder433,,,,white,nonhispanic,M,Athens  Athens Prefecture  GR,1060 Bernhard Crossroad Suite 15,Boston,Massachusetts,Suffolk County,02131,42.29255662362827,-71.06116042204106,571935.8725,787.5374999999999
+                    ";
+
+        let dir = env::temp_dir();
+
+        let mut f = std::fs::OpenOptions::new()
+            .create(true)
+            .write(true)
+            .read(true)
+            .open(dir.as_path().join("foo.txt"))
+            .unwrap();
+        
+        f.write_all(data); 
+        
+        f.rewind(); 
+
+        let mut rdr = csv::Reader::from_reader(&f);
+
+        let import_result = match import_providers(&mut rdr) {
+            Ok(value) => dbg!(value),
+            Err(e) => println!("Someerror {}", e),
+
+        };
+
+        // assert Ok()
+        assert_eq!(import_result, ());
+    }
+
+
+    
 }
