@@ -7,7 +7,7 @@ edition = "2021"
 [dependencies]
 import = { path = "../import" }
 database = { path = "../database" }
-rest_json_api = { path = "../rest_json_api" }
+json_api = { path = "../json_api" }
 
 bigdecimal = { version = "0.4.3", features = ["serde"] }
 chrono = { version = "0.4.38", features = ["serde"] }

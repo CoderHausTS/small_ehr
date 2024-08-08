@@ -20,7 +20,7 @@ fn api_router() -> Router {
         .merge(providers::provider_router())
 }
 
-pub async fn start_rest_api () {
+pub async fn start_json_api () {
 
     // run it with hyper
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));

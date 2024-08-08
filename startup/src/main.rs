@@ -2,7 +2,7 @@ extern crate dotenv;
 
 // use database::establish_connection;
 use import::{ csv_import, Cli, Commands, FileTypes };
-use rest_json_api::start_rest_api;
+use json_api::start_json_api;
 
 use dotenv::dotenv;
 
@@ -41,8 +41,8 @@ async fn main() {
             },
             Commands::Run => {
                 println!("Run this app.");
-                println!("Starting RESTful API server");
-                start_rest_api().await;  
+                println!("Starting json API server");
+                start_json_api().await;  
             }
         }
 
