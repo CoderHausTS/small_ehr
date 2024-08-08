@@ -2,7 +2,7 @@ extern crate dotenv;
 
 use cli_commands::{RestCli, RestApiCommands };
 
-// use rest_api::start_rest_api;
+use rest_api::start_rest_api;
 
 use dotenv::dotenv;
 // use std::process;
@@ -16,7 +16,7 @@ async fn main() {
         match cli.rest_commands {
             RestApiCommands::Run => {
                 println!("Starting RESTful API server");
-//                start_rest_api().await;  
+                start_rest_api().await;  
             }
         }
 

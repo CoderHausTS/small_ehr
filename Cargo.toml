@@ -4,5 +4,5 @@ members = [
 	"startup",
 	"import", 
 	"database", 
-	"json_api", "cli_commands",
+	"json_api", "cli_commands", "rest_api",
 ]
