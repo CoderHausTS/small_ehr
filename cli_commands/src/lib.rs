@@ -1,14 +1,21 @@
 use clap::{Parser, Subcommand, ValueEnum};
 
-#[derive(Parser)];
+#[derive(Parser)]
 #[command(version, about, long_about = None)]
-pub struct Cli {
+pub struct JsonCli {
     #[command(subcommand)]
-    pub commands: Commands,
+    pub import_commands: ImportCommands,
+}
+
+#[derive(Parser)]
+#[command(version, about, long_about = None)]
+pub struct RestCli {
+    #[command(subcommand)]
+    pub rest_commands: RestApiCommands,
 }
 
 #[derive(Subcommand)]
-pub enum Commands {
+pub enum ImportCommands {
     #[command(arg_required_else_help = false)]
     Import {
         #[arg(required = true)]
@@ -19,7 +26,14 @@ pub enum Commands {
     Run,
 }
 
-#[derive(ValueEnum, SubCommand, Clone)]
+#[derive(Subcommand)]
+pub enum RestApiCommands {
+    #[command(arg_required_else_help = false)]
+    Run,
+}
+
+
+#[derive(ValueEnum, Subcommand, Clone)]
 pub enum FileTypes {
     Csv,
 }

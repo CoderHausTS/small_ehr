@@ -1,20 +1,22 @@
 extern crate dotenv;
 
-use rest_api::start_rest_api;
+use cli_commands::{RestCli, RestApiCommands };
+
+// use rest_api::start_rest_api;
 
 use dotenv::dotenv;
-use std::process;
+// use std::process;
 use clap::Parser; 
 
 #[tokio::main]
 async fn main() {
         dotenv().ok();
-        let cli = Cli::parse();
+        let cli = RestCli::parse();
 
-        match cli.commands {
-            Commands::Run => {
+        match cli.rest_commands {
+            RestApiCommands::Run => {
                 println!("Starting RESTful API server");
-                start_rest_api().await;  
+//                start_rest_api().await;  
             }
         }
 
